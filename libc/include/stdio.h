@@ -3,5 +3,6 @@
 
 int puts(const char* s);
 int putchar(char c);
+int printf(const char *fmt, ...);
 
 #endif
