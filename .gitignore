@@ -1,4 +1,3 @@
 .vscode
-/libc/build
-/libc/bin
-/libc/test
+/build
+/bin
