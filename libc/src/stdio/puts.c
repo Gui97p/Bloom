@@ -3,7 +3,7 @@
 
 int puts(const char* s) {
     size_t len = strlen(s);
-    sys_write(1, s, len);
-    sys_write(1, "\n", 1);
+    sys_write(FD_STDOUT, s, len);
+    sys_write(FD_STDOUT, "\n", 1);
     return 0;
 }

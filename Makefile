@@ -20,8 +20,6 @@ LDFLAGS = \
 	-no-pie \
 	-T linker.ld
 
-OBJCOPY = objcopy
-
 BUILD = build
 BIN = bin
 
@@ -33,10 +31,11 @@ CRT_OBJ := $(BUILD)/crt/crt0.o
 ARCH_SRC := arch/x86_64/syscalls.S
 ARCH_OBJ := $(BUILD)/arch/x86_64/syscalls.o
 
-APP_SRC := apps/test/main.c
-APP_OBJ := $(BUILD)/apps/test/main.o
+# pega todos os .c em sysroot/src automaticamente
+APP_SRCS := $(shell find sysroot/src -name "*.c")
+APP_OBJS := $(patsubst %.c,$(BUILD)/%.o,$(APP_SRCS))
 
-TARGET := $(BIN)/start
+TARGET     := $(BIN)/start
 ELF_TARGET := ../rootfs/sysinit/userspace.elf
 
 all: libc $(TARGET) $(ELF_TARGET)
@@ -52,14 +51,14 @@ $(BUILD)/%.o: %.S
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(TARGET): $(CRT_OBJ) $(ARCH_OBJ) $(APP_OBJ)
+$(TARGET): $(CRT_OBJ) $(ARCH_OBJ) $(APP_OBJS)
 	@mkdir -p $(BIN)
 	$(CC) \
 	$(LDFLAGS) \
 	-o $@ \
 	$(CRT_OBJ) \
 	$(ARCH_OBJ) \
-	$(APP_OBJ) \
+	$(APP_OBJS) \
 	$(LIBC)
 
 $(ELF_TARGET): $(TARGET)
