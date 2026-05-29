@@ -9,14 +9,18 @@ CFLAGS = \
 	-no-pie \
 	-Wall \
 	-Wextra \
-	-Ilibc/include
+	-Ilibc/include \
+	-mno-sse -mno-sse2 -mno-mmx -mno-avx
 
 LDFLAGS = \
 	-ffreestanding \
 	-nostdlib \
 	-nostartfiles \
 	-nodefaultlibs \
-	-no-pie
+	-no-pie \
+	-T linker.ld
+
+OBJCOPY = objcopy
 
 BUILD = build
 BIN = bin
@@ -33,8 +37,9 @@ APP_SRC := apps/test/main.c
 APP_OBJ := $(BUILD)/apps/test/main.o
 
 TARGET := $(BIN)/start
+ELF_TARGET := ../rootfs/sysinit/userspace.elf
 
-all: libc $(TARGET)
+all: libc $(TARGET) $(ELF_TARGET)
 
 libc:
 	$(MAKE) -C libc
@@ -49,7 +54,6 @@ $(BUILD)/%.o: %.S
 
 $(TARGET): $(CRT_OBJ) $(ARCH_OBJ) $(APP_OBJ)
 	@mkdir -p $(BIN)
-
 	$(CC) \
 	$(LDFLAGS) \
 	-o $@ \
@@ -58,6 +62,12 @@ $(TARGET): $(CRT_OBJ) $(ARCH_OBJ) $(APP_OBJ)
 	$(APP_OBJ) \
 	$(LIBC)
 
+$(ELF_TARGET): $(TARGET)
+	@mkdir -p $(dir $@)
+	cp $< $@
+
 clean:
 	rm -rf build bin
 	$(MAKE) -C libc clean
+
+.PHONY: all libc clean

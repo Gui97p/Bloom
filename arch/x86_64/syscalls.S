@@ -9,5 +9,12 @@ syscall:
     mov %r9,  %r8
     mov 8(%rsp), %r9
 
+    push %rcx
+    push %r11
+
     syscall
+
+    pop %r11
+    pop %rcx
+
     ret

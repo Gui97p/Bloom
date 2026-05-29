@@ -1,14 +1,11 @@
-char *itoa(int value, char *str, int base) {
-    if (base < 2 || base > 36) {
-        str[0] = '\0';
-        return str;
-    }
-
-    char *ptr = str;
-    char *ptr1 = str;
-    char tmp;
-
+char *itoa(int value, char *buf, int base) {
+    char tmp[32];
+    char *p = tmp;
+    char *out = buf;
     int negative = 0;
+
+    if (base < 2 || base > 36)
+        goto end;
 
     if (value < 0 && base == 10) {
         negative = 1;
@@ -16,33 +13,18 @@ char *itoa(int value, char *str, int base) {
     }
 
     do {
-        int digit = value % base;
+        int digit = (unsigned int)value % base;
+        *p++ = (digit < 10) ? ('0' + digit) : ('a' + digit - 10);
+        value = (unsigned int)value / base;
+    } while (value > 0);
 
-        *ptr++ =
-            (digit < 10)
-                ? '0' + digit
-                : 'a' + (digit - 10);
+    if (negative)
+        *p++ = '-';
 
-        value /= base;
+    while (p > tmp)
+        *out++ = *--p;
 
-    } while (value);
-
-    if (negative) {
-        *ptr++ = '-';
-    }
-
-    *ptr = '\0';
-
-    ptr--;
-
-    while (ptr1 < ptr) {
-        tmp = *ptr;
-        *ptr = *ptr1;
-        *ptr1 = tmp;
-
-        ptr--;
-        ptr1++;
-    }
-
-    return str;
+end:
+    *out = '\0';
+    return buf;
 }
