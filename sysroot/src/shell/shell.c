@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <shell/commands.h>
+#include "readline.h"
 
 #define MAX_ARGS 16
 
@@ -36,6 +37,7 @@ void shell(int argc, char** argv) {
         if (!found) {
             printf("%s: Command not found", argv[0]);
         }
+
         putchar('\n');
     }
 }

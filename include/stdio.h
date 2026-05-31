@@ -27,7 +27,6 @@ int putchar(char c);
 int printf(const char *fmt, ...);
 int getchar();
 char* gets(char* buf, int size);
-char* readline(char* buf, int size);
 
 int fflush(FILE* stream);
 

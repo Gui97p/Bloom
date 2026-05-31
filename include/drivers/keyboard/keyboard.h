@@ -17,3 +17,5 @@ void keyboardFeedScancode(uint8_t scancode);
 bool keyboardPopEvent(keyEvent_t* event);
 
 char keyboardEventToAscii(keyEvent_t* ev);
+
+bool keyboardReadEvent(keyEvent_t* ev);

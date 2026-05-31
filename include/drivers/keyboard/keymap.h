@@ -42,6 +42,18 @@ typedef enum {
 
     KEY_SPACE,
 
+    KEY_UP,
+    KEY_DOWN,
+    KEY_LEFT,
+    KEY_RIGHT,
+
+    KEY_DELETE,
+    KEY_INSERT,
+    KEY_HOME,
+    KEY_END,
+    KEY_PAGEUP,
+    KEY_PAGEDOWN,
+
     KEY_MAX
 } keycode_t;
 
@@ -113,6 +125,22 @@ static const keycode_t scancodeMap[128] = {
     [0x36] = KEY_RSHIFT,
 
     [0x39] = KEY_SPACE,
+};
+
+static const keycode_t extendedScancodeMap[128] = {
+    [0x47] = KEY_HOME,
+    [0x48] = KEY_UP,
+    [0x49] = KEY_PAGEUP,
+
+    [0x4B] = KEY_LEFT,
+    [0x4D] = KEY_RIGHT,
+
+    [0x4F] = KEY_END,
+    [0x50] = KEY_DOWN,
+    [0x51] = KEY_PAGEDOWN,
+
+    [0x52] = KEY_INSERT,
+    [0x53] = KEY_DELETE,
 };
 
 static const char keyToAscii[KEY_MAX] = {
