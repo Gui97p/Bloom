@@ -6,6 +6,8 @@
 int puts(const char* s);
 int putchar(char c);
 int printf(const char *fmt, ...);
-char getchar();
+int getchar();
+char* gets(char* buf, int size);
+char* readline(char* buf, int size);
 
 #endif

@@ -9,7 +9,7 @@ CFLAGS = \
 	-no-pie \
 	-Wall \
 	-Wextra \
-	-Ilibc/include \
+	-Iinclude \
 	-mno-sse -mno-sse2 -mno-mmx -mno-avx
 
 LDFLAGS = \
@@ -31,7 +31,9 @@ CRT_OBJ := $(BUILD)/crt/crt0.o
 ARCH_SRC := arch/x86_64/syscalls.S
 ARCH_OBJ := $(BUILD)/arch/x86_64/syscalls.o
 
-# pega todos os .c em sysroot/src automaticamente
+DRIVER_SRC := $(shell find drivers -name "*.c")
+DRIVER_OBJ := $(patsubst %.c,$(BUILD)/%.o,$(DRIVER_SRC))
+
 APP_SRCS := $(shell find sysroot/src -name "*.c")
 APP_OBJS := $(patsubst %.c,$(BUILD)/%.o,$(APP_SRCS))
 
@@ -51,7 +53,7 @@ $(BUILD)/%.o: %.S
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(TARGET): $(CRT_OBJ) $(ARCH_OBJ) $(APP_OBJS)
+$(TARGET): $(CRT_OBJ) $(ARCH_OBJ) $(APP_OBJS) $(DRIVER_OBJ)
 	@mkdir -p $(BIN)
 	$(CC) \
 	$(LDFLAGS) \
@@ -59,6 +61,7 @@ $(TARGET): $(CRT_OBJ) $(ARCH_OBJ) $(APP_OBJS)
 	$(CRT_OBJ) \
 	$(ARCH_OBJ) \
 	$(APP_OBJS) \
+	$(DRIVER_OBJ) \
 	$(LIBC)
 
 $(ELF_TARGET): $(TARGET)

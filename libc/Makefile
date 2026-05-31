@@ -10,7 +10,7 @@ CFLAGS = \
 	-no-pie \
 	-Wall \
 	-Wextra \
-	-Iinclude
+	-I../include
 
 BUILD = ../build/libc
 LIB = ../sysroot/lib

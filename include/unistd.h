@@ -5,5 +5,6 @@
 #include <sys/types.h>
 
 ssize_t write(int fd, const void* buf, size_t size);
+void exit(int code);
 
 #endif

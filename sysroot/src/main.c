@@ -1,5 +1,5 @@
-#include <stdio.h>
+#include <shell/shell.h>
 
 int main() {
-    printf("oi");
+    shell();
 }
