@@ -1,4 +1,4 @@
-#include <shell/commands.h>
+#include "commands.h"
 
 int cmdHelp(int argc, char** argv);
 int cmdEcho(int argc, char** argv);

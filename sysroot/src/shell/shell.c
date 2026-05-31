@@ -1,30 +1,26 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
-#include <shell/commands.h>
+#include "commands.h"
 #include "readline.h"
+#include "parser.h"
 
 #define MAX_ARGS 16
 
 void shell(int argc, char** argv) {
     char line[256];
-
+    
     boot(argc, argv);
-
+    
     while (1) {
         printf("> ");
         fflush(stdout);
+
+        char* argv[16];
+        
         readline(line, sizeof(line));
-
-        char* argv[MAX_ARGS];
-        int argc = 0;
-
-        char* token = strtok(line, " ");
-
-        while (token && argc < 16) {
-            argv[argc++] = token;
-            token = strtok(NULL, " ");
-        }
+        
+        int argc = parse(line, argv, 16);
 
         bool found = false;
         for (int i = 0; i < commandCount; i++) {
