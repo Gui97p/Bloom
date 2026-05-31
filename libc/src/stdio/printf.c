@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include "file.h"
 #include <stdlib.h>
 #include <stdarg.h>
 
@@ -8,7 +8,7 @@ int printf(const char *fmt, ...) {
 
     while (*fmt) {
         if (*fmt != '%') {
-            putchar(*fmt);
+            filePutc(stdout, *fmt);
             fmt++;
             continue;
         }
@@ -18,14 +18,14 @@ int printf(const char *fmt, ...) {
         switch (*fmt) {
             case 'c': {
                 char c = (char)va_arg(args, int);
-                putchar(c);
+                filePutc(stdout, c);
                 break;
             }
 
             case 's': {
                 char *s = va_arg(args, char*);
                 while (*s)
-                    putchar(*s++);
+                    filePutc(stdout, *s++);
                 break;
             }
 
@@ -38,7 +38,7 @@ int printf(const char *fmt, ...) {
 
                 char *p = buf;
                 while (*p)
-                    putchar(*p++);
+                    filePutc(stdout, *p++);
                 break;
             }
 
@@ -50,7 +50,7 @@ int printf(const char *fmt, ...) {
 
                 char *p = buf;
                 while (*p)
-                    putchar(*p++);
+                    filePutc(stdout, *p++);
 
                 break;
             }
@@ -63,7 +63,7 @@ int printf(const char *fmt, ...) {
 
                 char *p = buf;
                 while (*p)
-                    putchar(*p++);
+                    filePutc(stdout, *p++);
                 break;
             }
 
@@ -80,7 +80,7 @@ int printf(const char *fmt, ...) {
 
                 char *p = buf;
                 while (*p)
-                    putchar(*p++);
+                    filePutc(stdout, *p++);
 
                 break;
             }
@@ -96,18 +96,18 @@ int printf(const char *fmt, ...) {
 
                 char *p = buf;
                 while (*p)
-                    putchar(*p++);
+                    filePutc(stdout, *p++);
 
                 break;
             }
 
             case '%':
-                putchar('%');
+                filePutc(stdout, '%');
                 break;
             
             default:
-                putchar('%');
-                putchar(*fmt);
+                filePutc(stdout, '%');
+                filePutc(stdout, *fmt);
                 break;
         }
 

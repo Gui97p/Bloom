@@ -27,6 +27,8 @@ char* readline(char* buf, int size) {
             buf[i++] = c;
             putchar(c);
         }
+
+        fflush(stdout);
     }
 
     buf[i] = '\0';

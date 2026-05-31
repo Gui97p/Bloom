@@ -1,6 +1,7 @@
-#include <sys/sys.h>
+#include <stdio.h>
+#include "file.h"
 
 int putchar(char c) {
-    return sys_write(FD_STDOUT, &c, 1);
+    return filePutc(stdout, (char)c);
 }
 

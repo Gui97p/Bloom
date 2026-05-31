@@ -1,9 +1,13 @@
-#include <sys/sys.h>
+#include <stdio.h>
 #include <string.h>
+#include "file.h"
 
 int puts(const char* s) {
-    size_t len = strlen(s);
-    sys_write(FD_STDOUT, s, len);
-    sys_write(FD_STDOUT, "\n", 1);
+    while (*s) {
+        filePutc(stdout, *s++);
+    }
+
+    filePutc(stdout, '\n');
+
     return 0;
 }

@@ -152,6 +152,7 @@ static const char keyToAscii[KEY_MAX] = {
     [KEY_L] = 'l',
 
     [KEY_ENTER] = '\n',
+    [KEY_BACKSPACE] = '\b',
 
     [KEY_Z] = 'z',
     [KEY_X] = 'x',
@@ -214,6 +215,7 @@ static const char keyToAsciiUpper[KEY_MAX] = {
     [KEY_L] = 'L',
 
     [KEY_ENTER] = '\n',
+    [KEY_BACKSPACE] = '\b',
 
     [KEY_Z] = 'Z',
     [KEY_X] = 'X',
