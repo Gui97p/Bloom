@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <shell/commands.h>
+#include "../commands.h"
 
 int cmdHelp(int argc, char** argv) {
     printf("%s", commands[0].name);
