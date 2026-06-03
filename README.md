@@ -1,6 +1,6 @@
 # Bloom Userland
 
-Bloom is the userland component of a hobbyist microkernel OS built from scratch. It runs on top of [Sekura](https://github.com/lasanha-dev/sekura), a custom x86-64 microkernel, and provides a minimal C runtime, a partial libc, a keyboard driver, and an interactive shell.
+Bloom is the userland component of a hobbyist microkernel OS built from scratch. It runs on top of [Sekura](https://github.com/mistvxd/sekura), a custom x86-64 microkernel, and provides a minimal C runtime, a partial libc, a keyboard driver, and an interactive shell.
 
 This project was built as a learning experience in low-level systems programming — no Linux, no glibc, no OS abstractions. Everything from the syscall wrapper to `printf` was written by hand.
 
@@ -101,4 +101,4 @@ The keyboard driver receives raw PS/2 scancodes from the kernel via `sys_read` o
 
 ## Kernel
 
-The kernel side (Sekura) is maintained separately by [@lasanha-dev](https://github.com/lasanha-dev).
+The kernel side (Sekura) is maintained separately by [@mistvxd](https://github.com/mistvxd).
