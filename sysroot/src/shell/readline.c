@@ -53,11 +53,11 @@ char* readline(char* buf, int size) {
                 
                 if (historyPos == -1) {
                     buf[i] = '\0';
-                    strncpy(tmp, buf, MAX_CMD_LEN-1);
+                    strcpy(tmp, buf);
                 }
 
                 historyPos = next;
-                int idx = (historyCount - 1 - historyPos) % HISTORY_SIZE;
+                int idx = (historyCount - 1 - historyPos + HISTORY_SIZE) % HISTORY_SIZE;
 
                 clearLine(i);
                 strncpy(buf, historyBuffer[idx], size - 1);
@@ -79,7 +79,7 @@ char* readline(char* buf, int size) {
                 if (historyPos == -1) {
                     strncpy(buf, tmp, size - 1);
                 } else {
-                    int idx = (historyCount - 1 - historyPos) % HISTORY_SIZE;
+                    int idx = (historyCount - 1 - historyPos + HISTORY_SIZE) % HISTORY_SIZE;
                     strncpy(buf, historyBuffer[idx], size - 1);
                 }
 

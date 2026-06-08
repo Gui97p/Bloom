@@ -100,40 +100,14 @@ char keyboardEventToAscii(keyEvent_t* ev) {
 }
 
 bool keyboardReadEvent(keyEvent_t* ev) {
-    static uint8_t pending[64];
-    static int pos = 0;
-    static int size = 0;
-
-    static bool keyState[256] = {0};
-    static bool nextExtended = false;
-
     while (1) {
-        if (pos >= size) {
-            size = sys_read(FD_STDIN, pending, sizeof(pending));
-            pos = 0;
-            if (size <= 0)
-                continue;
-        }
-
-        uint8_t scancode = pending[pos++];
-
+        uint8_t scancode = 0;
+        if (!sys_read(FD_STDIN, &scancode, 1)) continue;
+        if (scancode == 0) continue;
+        
         if (scancode == 0xE0) {
-            nextExtended = true;
             keyboardFeedScancode(scancode);
             continue;
-        }
-
-        bool released = (scancode & 0x80) != 0;
-        uint8_t base = scancode & 0x7F;
-
-        if (nextExtended) {
-            nextExtended = false;
-        } else {
-            if (!released && keyState[base])
-                continue;
-            if (released && !keyState[base])
-                continue;
-            keyState[base] = !released;
         }
 
         keyboardFeedScancode(scancode);

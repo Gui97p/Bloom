@@ -18,7 +18,7 @@ enum {
     SYSCALL_OPEN   = 2,
     SYSCALL_CLOSE  = 3,
     SYSCALL_INB    = 4,
-    SYSCALL_OUTB   = 5
+    SYSCALL_OUTB   = 5,
 };
 
 ssize_t sys_write(int fd, const void* buf, size_t count);

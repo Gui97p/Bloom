@@ -19,6 +19,7 @@ void shell(int argc, char** argv) {
         char* argv[16];
         
         readline(line, sizeof(line));
+        if (line[0] == '\0') continue;
         
         int argc = parse(line, argv, 16);
 

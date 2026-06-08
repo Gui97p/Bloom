@@ -115,5 +115,6 @@ int printf(const char *fmt, ...) {
     }
 
     va_end(args);
+    fflush(stdout);
     return 0;
 }
