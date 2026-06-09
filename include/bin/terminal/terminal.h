@@ -3,7 +3,13 @@
 #include <glib/glib.h>
 
 typedef struct {
-    char screen[60][120];
+    char ch;
+    uint32_t fg;
+    uint32_t bg;
+} termCell_t;
+
+typedef struct {
+    termCell_t (*screen)[120];
 
     int cursorX;
     int cursorY;
@@ -18,3 +24,4 @@ void terminalMain(gfxContext_t* ctx);
 void terminalPutChar(terminal_t* term, char c);
 void terminalWriteString(terminal_t* term, char* str);
 void terminalFlush(terminal_t* term);
+void terminalClear(terminal_t* term);

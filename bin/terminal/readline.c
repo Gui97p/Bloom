@@ -54,6 +54,8 @@ char* readline(terminal_t* term, char* buf, int size) {
                 if (historyPos == -1) {
                     buf[i] = '\0';
                     strcpy(tmp, buf);
+                    // strncpy(tmp, buf, MAX_CMD_LEN - 1);
+                    // tmp[MAX_CMD_LEN - 1] = '\0';
                 }
 
                 historyPos = next;

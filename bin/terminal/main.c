@@ -7,10 +7,30 @@
 #include <glib/glib.h>
 #include "readline.h"
 
+static termCell_t terminalBuffer[60][120];
+
+static void terminalScroll(terminal_t* term) {
+    for (int y = 1; y < term->rows; y++) {
+        memcpy(
+            term->screen[y - 1],
+            term->screen[y],
+            sizeof(term->screen[y])
+        );
+    }
+
+    memset(
+        term->screen[term->rows - 1],
+        0,
+        sizeof(term->screen[0])
+    );
+
+    term->cursorY = term->rows - 1;
+}
+
 void terminalMain(gfxContext_t* ctx) {
-    terminal_t term = {0};
+    terminal_t term = {.screen = terminalBuffer};
     term.cols = 120;
-    term.rows = 60;
+    term.rows = 49;
     term.cursorX = 0;
     term.cursorY = 0;
     term.gfx = ctx;
@@ -34,24 +54,28 @@ void terminalMain(gfxContext_t* ctx) {
 void terminalPutChar(terminal_t* term, char c) {
     switch (c) {
         case '\n':
-            if (term->cursorY < term->rows - 1) {
-                term->cursorY++;
-            }
-            
+            term->cursorY++;
             term->cursorX = 0;
+            printf("\n%d %d", term->cursorY, term->rows);
+            if (term->cursorY >= term->rows) {
+                terminalScroll(term);
+            }
+
             break;
         
         case '\b':
             if (term->cursorX > 0) {
                 term->cursorX--;
-                term->screen[term->cursorY][term->cursorX] = '\0';
+                term->screen[term->cursorY][term->cursorX].ch = '\0';
             }
             break;
 
         default:
             if (term->cursorX < term->cols - 1) {
-                term->screen[term->cursorY][term->cursorX++] = c;
-                term->screen[term->cursorY][term->cursorX] = '\0';
+                term->screen[term->cursorY][term->cursorX].ch = c;
+                term->screen[term->cursorY][term->cursorX].fg = 0xFFFFFF;
+                term->screen[term->cursorY][term->cursorX++].bg = 0x000000;
+                term->screen[term->cursorY][term->cursorX].ch = '\0';
             }
             break;
     }
@@ -70,8 +94,32 @@ void terminalFlush(terminal_t* term) {
     fillRect(term->gfx, 0, 0, term->gfx->width, term->gfx->height, 0x000000);
 
     for (int row = 0; row < term->rows; row++) {
-        drawString(term->gfx, 10, row * 16, term->screen[row], 0xFFFFFF);
+        for (int col = 0; col < term->cols; col++) {
+            char c = term->screen[row][col].ch;
+
+            if (c == '\0')
+                continue;
+
+            drawChar(
+                term->gfx,
+                10 + col * 8,
+                row * 16,
+                c,
+                term->screen[row][col].fg
+            );
+        }
     }
 
     gfxEndFrame(term->gfx);
+}
+
+void terminalClear(terminal_t* term) {
+    memset(
+        term->screen,
+        0,
+        term->rows * term->cols * sizeof(termCell_t)
+    );
+
+    term->cursorX = 0;
+    term->cursorY = 0;
 }
