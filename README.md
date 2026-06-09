@@ -4,7 +4,7 @@ Bloom is the userland component of a hobbyist microkernel OS built from scratch.
 
 This project was built as a learning experience in low-level systems programming — no Linux, no glibc, no OS abstractions. Everything from the syscall wrapper to `printf` was written by hand.
 
-> **Status:** Development paused. The kernel side was discontinued, so this repository captures the userland as it stood at that point.
+## **NOTE** - this README is outdated and will be updated later.
 
 ---
 

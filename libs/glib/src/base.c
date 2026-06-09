@@ -1,5 +1,5 @@
-#include <bloom/glib/glib.h>
-#include <bloom/glib/font8x16.h>
+#include <glib/glib.h>
+#include <glib/font8x16.h>
 
 int abs(int x) {
     return x < 0 ? -x : x;

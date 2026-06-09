@@ -21,29 +21,30 @@ LDFLAGS = \
 	-T linker.ld
 
 BUILD = build
-BIN = bin
 
-LIBC = sysroot/lib/libc.a
+LIBC = build/libc/libc.a
+GLIB = build/glib/glib.a
 
-CRT_SRC := crt/crt0.S
-CRT_OBJ := $(BUILD)/crt/crt0.o
+CRT_SRC := $(shell find crt -name "*.S")
+ARCH_SRC := $(shell find arch -name "*.S")
 
-ARCH_SRC := arch/x86_64/syscalls.S
-ARCH_OBJ := $(BUILD)/arch/x86_64/syscalls.o
-
+BIN_SRC := $(shell find bin -name "*.c")
+SRC_SRC := $(shell find src -name "*.c")
 DRIVER_SRC := $(shell find drivers -name "*.c")
+
+CRT_OBJ := $(patsubst %.S,$(BUILD)/%.o,$(CRT_SRC))
+ARCH_OBJ := $(patsubst %.S,$(BUILD)/%.o,$(ARCH_SRC))
+
+BIN_OBJ := $(patsubst %.c,$(BUILD)/%.o,$(BIN_SRC))
+SRC_OBJ := $(patsubst %.c,$(BUILD)/%.o,$(SRC_SRC))
 DRIVER_OBJ := $(patsubst %.c,$(BUILD)/%.o,$(DRIVER_SRC))
 
-APP_SRCS := $(shell find sysroot -name "*.c")
-APP_OBJS := $(patsubst %.c,$(BUILD)/%.o,$(APP_SRCS))
+TARGET := build/userspace.elf
 
-TARGET     := $(BIN)/start
-ELF_TARGET := ../rootfs/sysinit/userspace.elf
+all: libs $(TARGET)
 
-all: libc $(TARGET) $(ELF_TARGET)
-
-libc:
-	$(MAKE) -C libc
+libs:
+	$(MAKE) -C libs
 
 $(BUILD)/%.o: %.c
 	@mkdir -p $(dir $@)
@@ -53,23 +54,27 @@ $(BUILD)/%.o: %.S
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(TARGET): $(CRT_OBJ) $(ARCH_OBJ) $(APP_OBJS) $(DRIVER_OBJ)
-	@mkdir -p $(BIN)
+$(TARGET): libs \
+	$(CRT_OBJ) \
+	$(ARCH_OBJ) \
+	$(SRC_OBJ) \
+	$(DRIVER_OBJ) \
+	$(BIN_OBJ)
+
 	$(CC) \
 	$(LDFLAGS) \
 	-o $@ \
 	$(CRT_OBJ) \
 	$(ARCH_OBJ) \
-	$(APP_OBJS) \
+	$(SRC_OBJ) \
 	$(DRIVER_OBJ) \
+	$(BIN_OBJ) \
+	$(GLIB) \
 	$(LIBC)
 
-$(ELF_TARGET): $(TARGET)
-	@mkdir -p $(dir $@)
-	cp $< $@
-
 clean:
-	rm -rf build bin
-	$(MAKE) -C libc clean
+	rm -rf build
 
-.PHONY: all libc clean
+	$(MAKE) -C libs clean
+
+.PHONY: all libs clean

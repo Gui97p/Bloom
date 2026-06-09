@@ -10,16 +10,14 @@ CFLAGS = \
 	-no-pie \
 	-Wall \
 	-Wextra \
-	-I../include
+	-I../../include
 
-BUILD = ../build/libc
-LIB = ../sysroot/lib
+BUILD = ../../build/libc
 
 SRC_C := $(shell find src -name "*.c")
-
 OBJ := $(patsubst %.c,$(BUILD)/%.o,$(SRC_C))
 
-TARGET := $(LIB)/libc.a
+TARGET := $(BUILD)/libc.a
 
 all: $(TARGET)
 
@@ -28,7 +26,7 @@ $(BUILD)/%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(TARGET): $(OBJ)
-	@mkdir -p $(LIB)
+	@mkdir -p $(BUILD)
 	$(AR) rcs $@ $(OBJ)
 
 clean:
