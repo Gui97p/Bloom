@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include <glib/glib.h>
 #include <glib/font8x16.h>
 
@@ -21,6 +23,22 @@ gfxContext_t gfxInit(
     return ctx;
 }
 
+void gfxBeginFrame(gfxContext_t* ctx) {
+    memset(
+        ctx->backbuffer,
+        0,
+        ctx->width * ctx->height * sizeof(uint32_t)
+    );
+}
+
+void gfxEndFrame(gfxContext_t* ctx) {
+    memcpy(
+        ctx->buffer,
+        ctx->backbuffer,
+        ctx->width * ctx->height * 4
+    );
+}
+
 void putPixel(gfxContext_t* ctx, int x, int y, uint32_t color) {
     if (x < 0 || x >= ctx->width)
         return;
@@ -28,7 +46,7 @@ void putPixel(gfxContext_t* ctx, int x, int y, uint32_t color) {
     if (y < 0 || y >= ctx->height)
         return;
     
-    ctx->buffer[(ctx->pitch/4) * y + x] = color;
+    ctx->backbuffer[ctx->width * y + x] = color;
 }
 
 void drawLine(gfxContext_t* ctx, int x0, int x1, int y0, int y1, uint32_t color) {

@@ -1,13 +1,12 @@
+#include <bin/terminal/terminal.h>
 #include "commands.h"
 
-int cmdHelp(int argc, char** argv);
-int cmdEcho(int argc, char** argv);
-int cmdExit(int argc, char** argv);
-int cmdClear(int argc, char** argv);
-int cmdVersion(int argc, char** argv);
-int cmdUname(int argc, char** argv);
-
-int boot(int argc, char** argv);
+int cmdHelp(terminal_t* term, int argc, char** argv);
+int cmdEcho(terminal_t* term, int argc, char** argv);
+int cmdExit(terminal_t* term, int argc, char** argv);
+int cmdClear(terminal_t* term, int argc, char** argv);
+int cmdVersion(terminal_t* term, int argc, char** argv);
+int cmdUname(terminal_t* term, int argc, char** argv);
 
 command_t commands[] = {
     { "help", cmdHelp },

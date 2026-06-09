@@ -1,10 +1,11 @@
-#include <stdio.h>
+#include <bin/terminal/terminal.h>
 #include "../commands.h"
 
-int cmdHelp(int argc, char** argv) {
-    printf("%s", commands[0].name);
+int cmdHelp(terminal_t* term, int argc, char** argv) {
+    terminalWriteString(term, commands[0].name);
     for (int i = 1; i < commandCount; i++) {
-        printf(" %s", commands[i].name);
+        terminalPutChar(term, ' ');
+        terminalWriteString(term, commands[i].name);
     }
 
     return 0;

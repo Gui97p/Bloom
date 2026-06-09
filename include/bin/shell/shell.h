@@ -1,3 +1,3 @@
 #pragma once
 
-void shell();
+bool runCommand(terminal_t* term, char* line);

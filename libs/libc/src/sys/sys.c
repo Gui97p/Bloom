@@ -12,6 +12,6 @@ ssize_t sys_read(int fd, void* buf, size_t size) {
 }
 
 void sys_exit(int code) {
-    syscall(SYSCALL_CLOSE, (uint64_t)code, 0, 0, 0, 0, 0);
+    // syscall(SYSCALL_CLOSE, (uint64_t)code, 0, 0, 0, 0, 0);
     while (1) {}
 }

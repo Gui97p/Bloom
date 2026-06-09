@@ -4,7 +4,7 @@
 static char stdoutBuffer[BUFSIZ];
 
 FILE stdoutFile = {
-    .fd = FD_STDOUT,
+    .fd = FD_SERIAL,
     .buffer = stdoutBuffer,
     .bufferSize = BUFSIZ,
     .bufferPos = 0,

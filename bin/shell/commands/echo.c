@@ -1,15 +1,16 @@
-#include <stdio.h>
+#include <bin/terminal/terminal.h>
 
-int cmdEcho(int argc, char** argv) {
+int cmdEcho(terminal_t* term, int argc, char** argv) {
     if (argc <= 1) {
-        putchar('\n');
+        terminalPutChar(term, '\n');
         return 0;
     }
 
-    printf("%s", argv[1]);
+    terminalWriteString(term, argv[1]);
 
     for (int i = 2; i < argc; i++) {
-        printf(" %s", argv[i]);
+        terminalPutChar(term, ' ');
+        terminalWriteString(term, argv[i]);
     }
 
     return 0;

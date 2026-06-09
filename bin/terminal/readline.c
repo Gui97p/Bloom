@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <string.h>
+#include <bin/terminal/terminal.h>
 #include <drivers/keyboard/keyboard.h>
 
 #define HISTORY_SIZE 32
@@ -21,15 +21,15 @@ void historyAdd(const char* cmd) {
         historyCount++;
 }
 
-static void clearLine(int len) {
+static void clearLine(terminal_t* term, int len) {
     for (int i = 0; i < len; i ++) {
-        putchar('\b');
-        putchar(' ');
-        putchar('\b');
+        terminalPutChar(term, '\b');
+        // terminalPutChar(term, ' ');
+        // terminalPutChar(term, '\b');
     }
 }
 
-char* readline(char* buf, int size) {
+char* readline(terminal_t* term, char* buf, int size) {
     int i = 0;
 
     keyEvent_t ev;
@@ -59,13 +59,13 @@ char* readline(char* buf, int size) {
                 historyPos = next;
                 int idx = (historyCount - 1 - historyPos + HISTORY_SIZE) % HISTORY_SIZE;
 
-                clearLine(i);
+                clearLine(term, i);
                 strncpy(buf, historyBuffer[idx], size - 1);
                 buf[size - 1] = '\0';
                 i = strlen(buf);
-                printf("%s", buf);
+                terminalWriteString(term, buf);
 
-                fflush(stdout);
+                terminalFlush(term);
                 continue;
             
             case KEY_DOWN: {
@@ -74,7 +74,7 @@ char* readline(char* buf, int size) {
 
                 historyPos--;
 
-                clearLine(i);
+                clearLine(term, i);
 
                 if (historyPos == -1) {
                     strncpy(buf, tmp, size - 1);
@@ -85,8 +85,8 @@ char* readline(char* buf, int size) {
 
                 buf[size - 1] = '\0';
                 i = strlen(buf);
-                printf("%s", buf);
-                fflush(stdout);
+                terminalWriteString(term, buf);
+                terminalFlush(term);
                 continue;
             }
 
@@ -98,7 +98,7 @@ char* readline(char* buf, int size) {
 
         if (c) {
             if (c == '\n') {
-                putchar('\n');
+                terminalPutChar(term, '\n');
                 break;
             }
 
@@ -106,23 +106,23 @@ char* readline(char* buf, int size) {
                 if (i > 0) {
                     i--;
 
-                    putchar('\b');
-                    putchar(' ');
-                    putchar('\b');
+                    terminalPutChar(term, '\b');
+                    // terminalPutChar(term, ' ');
+                    // terminalPutChar(term, '\b');
                 }
 
-                fflush(stdout);
+                terminalFlush(term);
                 continue;
             }
 
             if (i < size - 1) {
                 buf[i++] = c;
-                putchar(c);
+                terminalPutChar(term, c);
                 historyPos = -1;
             }
         }
 
-        fflush(stdout);
+        terminalFlush(term);
     }
 
     buf[i] = '\0';

@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #define FRAMEBUFFER_ADDR 0x7000000000
-#define FRAMEBUFFER_INFO 0x7000100000
+#define FRAMEBUFFER_INFO 0x7100000000
 
 typedef struct {
     uint64_t width;

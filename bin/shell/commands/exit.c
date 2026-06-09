@@ -1,8 +1,9 @@
+#include <bin/terminal/terminal.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-int cmdExit(int argc, char** argv) {
+int cmdExit(terminal_t* term, int argc, char** argv) {
     int code = 0;
 
     if (argc > 1) {

@@ -1,11 +1,11 @@
-#include <stdio.h>
+#include <bin/terminal/terminal.h>
 
-int cmdClear(int argc, char** argv) {
+int cmdClear(terminal_t* term, int argc, char** argv) {
     (void)argc;
     (void)argv;
 
     for (int i = 0; i < 40; i++)
-        putchar('\n');
+        terminalPutChar(term, '\n');
     
     return 0;
 }

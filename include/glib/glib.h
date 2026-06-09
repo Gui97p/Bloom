@@ -4,6 +4,8 @@
 
 typedef struct {
     uint32_t* buffer;
+    uint32_t* backbuffer;
+
     int width;
     int height;
     int pitch;
@@ -15,6 +17,9 @@ gfxContext_t gfxInit(
     int height,
     int pitch
 );
+
+void gfxBeginFrame(gfxContext_t* ctx);
+void gfxEndFrame(gfxContext_t* ctx);
 
 void putPixel(gfxContext_t* ctx, int x, int y, uint32_t color);
 

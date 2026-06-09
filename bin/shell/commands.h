@@ -1,8 +1,8 @@
 #pragma once
 
-int boot(int argc, char** argv);
+#include <bin/terminal/terminal.h>
 
-typedef int (*command_func_t)(int argc, char** argv);
+typedef int (*command_func_t)(terminal_t* term, int argc, char** argv);
 
 typedef struct {
     const char* name;
