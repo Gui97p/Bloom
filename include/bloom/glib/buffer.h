@@ -1,0 +1,16 @@
+#pragma once
+
+#include <stdint.h>
+
+#define FRAMEBUFFER_ADDR 0x7000000000
+#define FRAMEBUFFER_INFO 0x7000100000
+
+typedef struct {
+    uint64_t width;
+    uint64_t height;
+    uint64_t pitch;
+} FramebufferInfo;
+
+extern uint32_t* fb;
+extern FramebufferInfo* fb_info;
+

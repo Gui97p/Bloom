@@ -34,7 +34,7 @@ ARCH_OBJ := $(BUILD)/arch/x86_64/syscalls.o
 DRIVER_SRC := $(shell find drivers -name "*.c")
 DRIVER_OBJ := $(patsubst %.c,$(BUILD)/%.o,$(DRIVER_SRC))
 
-APP_SRCS := $(shell find sysroot/src -name "*.c")
+APP_SRCS := $(shell find sysroot -name "*.c")
 APP_OBJS := $(patsubst %.c,$(BUILD)/%.o,$(APP_SRCS))
 
 TARGET     := $(BIN)/start
