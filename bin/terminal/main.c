@@ -5,6 +5,8 @@
 #include <bin/terminal/terminal.h>
 #include <bin/shell/shell.h>
 #include <glib/glib.h>
+#include <glib/fonts/font.h>
+
 #include "readline.h"
 
 static termCell_t terminalBuffer[60][120];
@@ -28,7 +30,8 @@ static void terminalScroll(terminal_t* term) {
 }
 
 void terminalMain(gfxContext_t* ctx) {
-    terminal_t term = {.screen = terminalBuffer};
+    terminal_t term = {0};
+    term.screen = terminalBuffer;
     term.cols = 120;
     term.rows = 49;
     term.cursorX = 0;
@@ -37,12 +40,12 @@ void terminalMain(gfxContext_t* ctx) {
 
     terminalWriteString(&term, "Welcome to BloomOS!\n");
 
-    while (1) {
-        terminalWriteString(&term, "> ");
-        char line[110];
+    while (1) {    
+        terminalWriteString(&term, "user@host:~ $ ");
+        char line[120];
         terminalFlush(&term);
 
-        readline(&term, line, 110);
+        readline(&term, line, 120);
         if (line[0] == '\0') continue;
 
         runCommand(&term, line);
@@ -53,24 +56,25 @@ void terminalMain(gfxContext_t* ctx) {
 
 void terminalPutChar(terminal_t* term, char c) {
     switch (c) {
-        case '\n':
+        case '\n': {
             term->cursorY++;
             term->cursorX = 0;
-            printf("\n%d %d", term->cursorY, term->rows);
             if (term->cursorY >= term->rows) {
                 terminalScroll(term);
             }
 
             break;
+        }
         
-        case '\b':
+        case '\b': {
             if (term->cursorX > 0) {
                 term->cursorX--;
                 term->screen[term->cursorY][term->cursorX].ch = '\0';
             }
             break;
+        }
 
-        default:
+        default: {
             if (term->cursorX < term->cols - 1) {
                 term->screen[term->cursorY][term->cursorX].ch = c;
                 term->screen[term->cursorY][term->cursorX].fg = 0xFFFFFF;
@@ -78,6 +82,7 @@ void terminalPutChar(terminal_t* term, char c) {
                 term->screen[term->cursorY][term->cursorX].ch = '\0';
             }
             break;
+        }
     }
 }
 
@@ -90,7 +95,7 @@ void terminalWriteString(terminal_t* term, char* str) {
 
 void terminalFlush(terminal_t* term) {
     gfxBeginFrame(term->gfx);
-
+    
     fillRect(term->gfx, 0, 0, term->gfx->width, term->gfx->height, 0x000000);
 
     for (int row = 0; row < term->rows; row++) {
@@ -102,6 +107,7 @@ void terminalFlush(terminal_t* term) {
 
             drawChar(
                 term->gfx,
+                &font8x16,
                 10 + col * 8,
                 row * 16,
                 c,

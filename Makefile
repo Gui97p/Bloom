@@ -39,7 +39,7 @@ BIN_OBJ := $(patsubst %.c,$(BUILD)/%.o,$(BIN_SRC))
 SRC_OBJ := $(patsubst %.c,$(BUILD)/%.o,$(SRC_SRC))
 DRIVER_OBJ := $(patsubst %.c,$(BUILD)/%.o,$(DRIVER_SRC))
 
-TARGET := build/userspace.elf
+TARGET := build/init.elf
 
 all: libs $(TARGET)
 

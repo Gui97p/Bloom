@@ -3,7 +3,7 @@
 #include <drivers/keyboard/keyboard.h>
 
 #define HISTORY_SIZE 32
-#define MAX_CMD_LEN 256
+#define MAX_CMD_LEN 120
 
 static char historyBuffer[HISTORY_SIZE][MAX_CMD_LEN];
 static int historyCount = 0;
@@ -45,7 +45,7 @@ char* readline(terminal_t* term, char* buf, int size) {
             continue;
         
         switch (ev.key) {
-            case KEY_UP:
+            case KEY_UP: {
                 int next = historyPos + 1;
                 int maxPos = historyCount > HISTORY_SIZE ? HISTORY_SIZE : historyCount;
                 if (next >= maxPos)
@@ -53,9 +53,9 @@ char* readline(terminal_t* term, char* buf, int size) {
                 
                 if (historyPos == -1) {
                     buf[i] = '\0';
-                    strcpy(tmp, buf);
-                    // strncpy(tmp, buf, MAX_CMD_LEN - 1);
-                    // tmp[MAX_CMD_LEN - 1] = '\0';
+                    // strcpy(tmp, buf);
+                    strncpy(tmp, buf, MAX_CMD_LEN - 1);
+                    tmp[MAX_CMD_LEN - 1] = '\0';
                 }
 
                 historyPos = next;
@@ -65,10 +65,12 @@ char* readline(terminal_t* term, char* buf, int size) {
                 strncpy(buf, historyBuffer[idx], size - 1);
                 buf[size - 1] = '\0';
                 i = strlen(buf);
+                if (i >= size) i = size - 1;
                 terminalWriteString(term, buf);
 
                 terminalFlush(term);
                 continue;
+            }
             
             case KEY_DOWN: {
                 if (historyPos == -1)
