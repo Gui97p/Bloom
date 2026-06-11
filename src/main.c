@@ -12,7 +12,7 @@ int main() {
 
     gfxContext_t ctx = gfxInit(fb, backbuffer, fb_info->width, fb_info->height, fb_info->pitch);
 
-    terminalMain(&ctx);
+    termMain(&ctx);
 
     gfxBeginFrame(&ctx);
     

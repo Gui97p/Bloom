@@ -23,11 +23,7 @@ gfxContext_t gfxInit(
 }
 
 void gfxBeginFrame(gfxContext_t* ctx) {
-    memset(
-        ctx->backbuffer,
-        0,
-        ctx->width * ctx->height * sizeof(uint32_t)
-    );
+    (void)ctx;
 }
 
 void gfxEndFrame(gfxContext_t* ctx) {

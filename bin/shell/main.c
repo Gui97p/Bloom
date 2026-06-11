@@ -19,10 +19,7 @@ bool runCommand(terminal_t* term, char* line) {
         }
     }
 
-    // printf("%s: Command not found\n", argv[0]);
-
-    terminalWriteString(term, argv[0]);
-    terminalWriteString(term, ": Command not found\n");
+    termPrintf(term, "%s: Command not found", argv[0]);
 
     return false;
 }

@@ -23,9 +23,9 @@ void historyAdd(const char* cmd) {
 
 static void clearLine(terminal_t* term, int len) {
     for (int i = 0; i < len; i ++) {
-        terminalPutChar(term, '\b');
-        // terminalPutChar(term, ' ');
-        // terminalPutChar(term, '\b');
+        termPutChar(term, '\b');
+        // termPutChar(term, ' ');
+        // termPutChar(term, '\b');
     }
 }
 
@@ -66,9 +66,9 @@ char* readline(terminal_t* term, char* buf, int size) {
                 buf[size - 1] = '\0';
                 i = strlen(buf);
                 if (i >= size) i = size - 1;
-                terminalWriteString(term, buf);
+                termWrite(term, buf);
 
-                terminalFlush(term);
+                termFlush(term);
                 continue;
             }
             
@@ -89,8 +89,8 @@ char* readline(terminal_t* term, char* buf, int size) {
 
                 buf[size - 1] = '\0';
                 i = strlen(buf);
-                terminalWriteString(term, buf);
-                terminalFlush(term);
+                termWrite(term, buf);
+                termFlush(term);
                 continue;
             }
 
@@ -102,7 +102,7 @@ char* readline(terminal_t* term, char* buf, int size) {
 
         if (c) {
             if (c == '\n') {
-                terminalPutChar(term, '\n');
+                termPutChar(term, '\n');
                 break;
             }
 
@@ -110,23 +110,23 @@ char* readline(terminal_t* term, char* buf, int size) {
                 if (i > 0) {
                     i--;
 
-                    terminalPutChar(term, '\b');
-                    // terminalPutChar(term, ' ');
-                    // terminalPutChar(term, '\b');
+                    termPutChar(term, '\b');
+                    // termPutChar(term, ' ');
+                    // termPutChar(term, '\b');
                 }
 
-                terminalFlush(term);
+                termFlush(term);
                 continue;
             }
 
             if (i < size - 1) {
                 buf[i++] = c;
-                terminalPutChar(term, c);
+                termPutChar(term, c);
                 historyPos = -1;
             }
         }
 
-        terminalFlush(term);
+        termFlush(term);
     }
 
     buf[i] = '\0';

@@ -2,15 +2,23 @@
 #include <bloom/version.h>
 
 int cmdVersion(terminal_t* term, int argc, char** argv) {
-    terminalWriteString(term, BLOOM_NAME);
-    terminalWriteString(term, " Userspace\nVersion: ");
-    terminalWriteString(term, BLOOM_VERSION);
-    terminalWriteString(term, "\nBuild: ");
-    terminalWriteString(term, __DATE__);
-    terminalWriteString(term, " ");
-    terminalWriteString(term, __TIME__);
-    terminalWriteString(term, "\nCodename: ");
-    terminalWriteString(term, BLOOM_CODENAME);
+    termPrintf(term, "%s Userspace\nVersion: %s\nBuild: %s %s\nCodename: %s",
+        BLOOM_NAME,
+        BLOOM_VERSION,
+        __DATE__,
+        __TIME__,
+        BLOOM_CODENAME
+    );
+
+    // termWrite(term, BLOOM_NAME);
+    // termWrite(term, " Userspace\nVersion: ");
+    // termWrite(term, BLOOM_VERSION);
+    // termWrite(term, "\nBuild: ");
+    // termWrite(term, __DATE__);
+    // termWrite(term, " ");
+    // termWrite(term, __TIME__);
+    // termWrite(term, "\nCodename: ");
+    // termWrite(term, BLOOM_CODENAME);
 
     return 0;
 }
