@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <sys/sys.h>
+#include <sys/write.h>
 
 int fflush(FILE* stream) {
     if (!stream)

@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <sys/sys.h>
+#include <sys/syscall.h>
 
 static char stdoutBuffer[BUFSIZ];
 

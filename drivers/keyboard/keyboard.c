@@ -1,5 +1,6 @@
 #include <drivers/keyboard/keyboard.h>
-#include <sys/sys.h>
+#include <sys/read.h>
+#include <sys/syscall.h>
 
 #define KEYBOARD_QUEUE_SIZE 64
 

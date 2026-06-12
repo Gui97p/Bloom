@@ -1,5 +1,5 @@
-#include <sys/sys.h>
+//#include <sys/exit.h>
 
 void exit(int code) {
-    sys_exit(code);
+    return;
 }
