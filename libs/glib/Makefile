@@ -14,7 +14,7 @@ CFLAGS = \
 
 BUILD = ../../build/glib
 
-SRC_C := $(shell find src -name "*.c")
+SRC_C := $(shell find -name "*.c")
 OBJ := $(patsubst %.c,$(BUILD)/%.o,$(SRC_C))
 
 TARGET := $(BUILD)/glib.a

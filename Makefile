@@ -41,7 +41,10 @@ DRIVER_OBJ := $(patsubst %.c,$(BUILD)/%.o,$(DRIVER_SRC))
 
 TARGET := build/init.elf
 
-all: libs $(TARGET)
+all: libs $(TARGET) copy
+
+copy:
+	@cp build/init.elf ../rootfs/sysinit
 
 libs:
 	$(MAKE) -C libs

@@ -1,14 +1,19 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include <bin/terminal/terminal.h>
 #include <drivers/keyboard/keyboard.h>
-#include <stdio.h>
 
-#include <glib/glib.h>
+#include <glib/gfx/context.h>
 #include <glib/buffer.h>
 
-static uint32_t backbuffer[1280 * 800];
+// static uint32_t backbuffer[1280 * 800];
 
 int main() {
     keyboardInit();
+    // setupFramebuffer();
+    uint32_t *backbuffer = (uint32_t*)malloc(fb_info->width * fb_info->height * sizeof(uint32_t));
 
     gfxContext_t ctx = gfxInit(fb, backbuffer, fb_info->width, fb_info->height, fb_info->pitch);
 

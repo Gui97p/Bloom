@@ -11,6 +11,8 @@ long long llabs(long long x);
 char *itoa(int value, char *str, int base);
 char *utoa(uint64_t value, char *buf, int base);
 int atoi(const char *str);
+
+void *malloc(size_t size);
 void free(void *ptr);
 
 #endif

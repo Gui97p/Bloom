@@ -6,7 +6,8 @@
 
 #include <bin/terminal/terminal.h>
 #include <bin/shell/shell.h>
-#include <glib/glib.h>
+#include <glib/gfx/context.h>
+#include <glib/gfx/rect.h>
 #include <glib/fonts/font.h>
 
 #include "readline.h"

@@ -1,6 +1,7 @@
 #pragma once
 
-#include <glib/glib.h>
+#include <glib/gfx/context.h>
+#include <glib/fonts/font.h>
 
 typedef struct {
     char ch;
