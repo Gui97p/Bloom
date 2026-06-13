@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include <bin/terminal/terminal.h>
 #include <drivers/keyboard/keyboard.h>
@@ -12,10 +14,9 @@
 
 int main() {
     keyboardInit();
-    // setupFramebuffer();
-    uint32_t *backbuffer = (uint32_t*)malloc(fb_info->width * fb_info->height * sizeof(uint32_t));
+    setupFramebuffer();
 
-    gfxContext_t ctx = gfxInit(fb, backbuffer, fb_info->width, fb_info->height, fb_info->pitch);
+    gfxContext_t ctx = gfxInit(fb, fb_info.width, fb_info.height, fb_info.pitch);
 
     termMain(&ctx);
 

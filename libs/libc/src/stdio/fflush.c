@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <sys/write.h>
+#include <unistd.h>
 
 int fflush(FILE* stream) {
     if (!stream)
@@ -8,7 +8,7 @@ int fflush(FILE* stream) {
     if (stream->bufferPos == 0)
         return 0;
 
-    sys_write(
+    write(
         stream->fd,
         stream->buffer,
         stream->bufferPos

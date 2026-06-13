@@ -1,14 +1,15 @@
-#include <glib/gfx/context.h>
 #include <string.h>
+#include <stdlib.h>
+#include <glib/gfx/context.h>
 
 gfxContext_t gfxInit(
     uint32_t* fb,
-    uint32_t* bb,
     int width,
     int height,
     int pitch
 ) {
     gfxContext_t ctx;
+    uint32_t *bb = (uint32_t*)malloc(width * height * sizeof(uint32_t));
 
     ctx.buffer = fb;
     ctx.backbuffer = bb;

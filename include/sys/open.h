@@ -2,4 +2,4 @@
 
 #include <sys/types.h>
 
-ssize_t sys_open(const void* buf);
+ssize_t sys_open(const void* buf, int flags);

@@ -1,120 +1,26 @@
-#include "file.h"
+#include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include "formatter.h"
+
+static void stdoutPut(void *ctx, char c) {
+    (void)ctx;
+
+    write(stdout->fd, &c, 1);
+}
+
+int vprintf(const char *fmt, va_list args) {
+    return vformat(stdoutPut, NULL, fmt, args);
+}
 
 int printf(const char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
 
-    while (*fmt) {
-        if (*fmt != '%') {
-            filePutc(stdout, *fmt);
-            fmt++;
-            continue;
-        }
-
-        fmt++;
-
-        switch (*fmt) {
-            case 'c': {
-                char c = (char)va_arg(args, int);
-                filePutc(stdout, c);
-                break;
-            }
-
-            case 's': {
-                char *s = va_arg(args, char*);
-                while (*s)
-                    filePutc(stdout, *s++);
-                break;
-            }
-
-            case 'i':
-            case 'd': {
-                int n = va_arg(args, int);
-
-                char buf[32];
-                itoa(n, buf, 10);
-
-                char *p = buf;
-                while (*p)
-                    filePutc(stdout, *p++);
-                break;
-            }
-
-            case 'u': {
-                unsigned int n = va_arg(args, unsigned int);
-
-                char buf[32];
-                utoa(n, buf, 10);
-
-                char *p = buf;
-                while (*p)
-                    filePutc(stdout, *p++);
-
-                break;
-            }
-
-            case 'x': {
-                int n = va_arg(args, int);
-
-                char buf[32];
-                itoa(n, buf, 16);
-
-                char *p = buf;
-                while (*p)
-                    filePutc(stdout, *p++);
-                break;
-            }
-
-            case 'X': {
-                unsigned int n = va_arg(args, unsigned int);
-
-                char buf[32];
-                utoa(n, buf, 16);
-
-                for (char *p = buf; *p; p++) {
-                    if (*p >= 'a' && *p <= 'f')
-                        *p -= 32;
-                }
-
-                char *p = buf;
-                while (*p)
-                    filePutc(stdout, *p++);
-
-                break;
-            }
-
-            case 'p': {
-                void *ptr = va_arg(args, void*);
-
-                putchar('0');
-                putchar('x');
-
-                char buf[32];
-                utoa((unsigned long)ptr, buf, 16);
-
-                char *p = buf;
-                while (*p)
-                    filePutc(stdout, *p++);
-
-                break;
-            }
-
-            case '%':
-                filePutc(stdout, '%');
-                break;
-            
-            default:
-                filePutc(stdout, '%');
-                filePutc(stdout, *fmt);
-                break;
-        }
-
-        fmt++;
-    }
+    int ret = vprintf(fmt, args);
 
     va_end(args);
-    fflush(stdout);
-    return 0;
+    
+    return ret;
 }

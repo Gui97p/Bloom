@@ -15,4 +15,9 @@ int atoi(const char *str);
 void *malloc(size_t size);
 void free(void *ptr);
 
+void srand(unsigned int seed);
+int rand();
+
+void exit(int code);
+
 #endif
