@@ -10,73 +10,54 @@
 #include <glib/gfx/rect.h>
 #include <glib/fonts/font.h>
 
-#include "readline.h"
-
-static termCell_t terminalBuffer[60][120];
-static termCell_t previous[60][120];
-
 static void termScroll(terminal_t* term) {
     for (int y = 1; y < term->rows; y++) {
         memcpy(
-            term->screen[y - 1],
-            term->screen[y],
-            sizeof(term->screen[y])
+            &term->screen[(y - 1) * term->cols],
+            &term->screen[y * term->cols],
+            sizeof(termCell_t) * term->cols
         );
     }
 
     memset(
-        term->screen[term->rows - 1],
+        &term->screen[(term->rows-1) * term->cols],
         0,
-        sizeof(term->screen[0])
+        sizeof(termCell_t) * term->cols
     );
 
     term->cursorY = term->rows - 1;
 
-    memset(previous, 0xFF, sizeof(previous));
+    memset(term->previous, 0xFF, term->rows * term->cols * sizeof(termCell_t));
 }
 
-void termMain(gfxContext_t* ctx) {
-    terminal_t term = {0};
-    term.screen = terminalBuffer;
-    term.cols = 120;
-    term.rows = 49;
-    term.cursorX = 0;
-    term.cursorY = 0;
-    term.currentFg = 0xAAAAAA;
-    term.currentBg = 0x1A001A;
-    term.font = &font8x16;
-    term.gfx = ctx;
-    
-    memset(terminalBuffer, 0, sizeof(terminalBuffer));
-    
-    termClear(&term);
+void termInit(terminal_t* term, gfxContext_t* ctx) {
+    term->font = &font16x32;
 
+    term->cols = ctx->width / term->font->width;
+    term->rows = ctx->height / term->font->height;
+
+    term->cursorX = 0;
+    term->cursorY = 0;
+
+    term->currentFg = 0xAAAAAA;
+    term->currentBg = 0x1A001A;
+
+    term->gfx = ctx;
+
+    size_t size = term->rows * term->cols * sizeof(termCell_t);
+
+    term->screen = malloc(size);
+    term->previous = malloc(size);
+
+    memset(term->screen, 0, size);
+    memset(term->previous, 0, size);
+    termClear(term);
+    
     gfxBeginFrame(ctx);
-    fillRect(ctx, 0, 0, ctx->width, ctx->height, term.currentBg);
+    fillRect(ctx, 0, 0, ctx->width, ctx->height, term->currentBg);
     gfxEndFrame(ctx);
-
-    memset(previous, 0xFF, sizeof(previous));
     
-    termWriteEx(&term, "Welcome to BloomOS!\n", 0xFF884D, term.currentBg);
-
-    while (1) {
-        termWriteEx(&term, "user", 0x1CB51C, term.currentBg);
-        termPutChar(&term, '@');
-        termWriteEx(&term, "host", 0x1CB51C, term.currentBg);
-        termPutChar(&term, ':');
-        termPutCharEx(&term, '~', 0x008ADE, term.currentBg);
-        termWrite(&term, " $ ");
-        
-        char line[120];
-        termFlush(&term);
-
-        readline(&term, line, 120);
-        if (line[0] == '\0') continue;
-
-        runCommand(&term, line);
-
-        termPutChar(&term, '\n');
-    }
+    memset(term->previous, 0xFF, size);
 }
 
 void termSetColor(terminal_t* term, uint32_t fg, uint32_t bg) {
@@ -103,15 +84,14 @@ void termPutCharEx(terminal_t* term, char c, uint32_t fg, uint32_t bg) {
         case '\b': {
             if (term->cursorX > 0) {
                 term->cursorX--;
-                term->screen[term->cursorY][term->cursorX].ch = '\0';
+                CELL(term, term->cursorY, term->cursorX).ch = '\0';
             }
             break;
         }
 
         default: {
             if (term->cursorX < term->cols - 1) {
-                termCell_t* cell =
-                    &term->screen[term->cursorY][term->cursorX];
+                termCell_t* cell = &CELL(term, term->cursorY, term->cursorX);
 
                 cell->ch = c;
                 cell->fg = fg;
@@ -120,7 +100,8 @@ void termPutCharEx(terminal_t* term, char c, uint32_t fg, uint32_t bg) {
                 term->cursorX++;
 
                 if (term->cursorX < term->cols) {
-                    term->screen[term->cursorY][term->cursorX].ch = '\0';
+
+                    CELL(term, term->cursorY, term->cursorX).ch = '\0';
                 }
             }
             break;
@@ -155,12 +136,12 @@ static inline bool termCellEqual(termCell_t a, termCell_t b) {
 void termRenderer(terminal_t* term) {
     for (int row = 0; row < term->rows; row++) {
         for (int col = 0; col < term->cols; col++) {
-            termCell_t cell = term->screen[row][col];
+            termCell_t cell = CELL(term, row, col);
 
-            if (termCellEqual(cell, previous[row][col])) continue;
+            if (termCellEqual(cell, PCELL(term, row, col))) continue;
 
-            int x = 10 + col * 8;
-            int y = row * 16;
+            int x = 10 + col * term->font->width;
+            int y = row * term->font->height;
 
             fillRect(
                 term->gfx,
@@ -178,11 +159,11 @@ void termRenderer(terminal_t* term) {
                     x,
                     y,
                     cell.ch,
-                    term->screen[row][col].fg
+                    cell.fg
                 );
             }
 
-            previous[row][col] = cell;
+            PCELL(term, row, col) = cell;
                 
         }
     }
@@ -278,13 +259,13 @@ void termFlush(terminal_t* term) {
 void termClear(terminal_t* term) {
     for (int y = 0; y < term->rows; y++) {
         for (int x = 0; x < term->cols; x++) {
-            term->screen[y][x].ch = '\0';
-            term->screen[y][x].fg = term->currentFg;
-            term->screen[y][x].bg = term->currentBg;
+            CELL(term, y, x).ch = '\0';
+            CELL(term, y, x).fg = term->currentFg;
+            CELL(term, y, x).bg = term->currentBg;
         }
     }
 
-    memset(previous, 0xFF, sizeof(previous));
+    memset(term->previous, 0xFF, term->rows * term->cols * sizeof(termCell_t));
 
     term->cursorX = 0;
     term->cursorY = 0;

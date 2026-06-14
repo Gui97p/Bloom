@@ -14,11 +14,13 @@ void drawChar(gfxContext_t* ctx, font_t* font, int x, int y, char c, uint32_t co
     const uint8_t* glyph = (const uint8_t*)font->bitmap + index * font->height * font->bytesPerRow;
 
     for (int row = 0; row < font->height; row++) {
+        const uint8_t* rowData = glyph + row * font->bytesPerRow;
+
         for (int col = 0; col < font->width; col++) {
-            int byte = col / 8;
+            int byte = font->bytesPerRow - 1 - (col / 8);
             int bit  = 7 - (col % 8);
 
-            if (glyph[row * font->bytesPerRow + byte] & (1 << bit)) {
+            if (rowData[byte] & (1 << bit)) {
                 putPixel(ctx, x + col, y + row, color);
             }
         }
@@ -30,7 +32,7 @@ void drawString(gfxContext_t* ctx, font_t* font, int x, int y, const char* str, 
     while (*str) {
         drawChar(ctx, font, x, y, *str, color);
 
-        x += 8;
+        x += font->width;
         str++;
     }
 }

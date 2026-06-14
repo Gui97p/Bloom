@@ -2,7 +2,7 @@
 #include <glib/fonts/bitmap16x32.h>
 
 font_t font16x32 = {
-    .bitmap = font16x32bitmap,
+    .bitmap = (const uint8_t*)font16x32bitmap,
     .width = 16,
     .height = 32,
     .firstChar = 32,

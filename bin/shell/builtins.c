@@ -1,5 +1,5 @@
 #include <bin/terminal/terminal.h>
-#include "commands.h"
+#include "builtins.h"
 
 int cmdHelp(terminal_t* term, int argc, char** argv);
 int cmdEcho(terminal_t* term, int argc, char** argv);
@@ -13,7 +13,7 @@ int cmdEchofile(terminal_t* term, int argc, char** argv);
 int cmdCp(terminal_t* term, int argc, char** argv);
 int cmdLs(terminal_t* term, int argc, char** argv);
 
-command_t commands[] = {
+builtin_t builtins[] = {
     { "help", cmdHelp },
     { "echo", cmdEcho },
     { "exit", cmdExit },
@@ -27,5 +27,5 @@ command_t commands[] = {
     { "ls", cmdLs }
 };
 
-const int commandCount =
-    sizeof(commands) / sizeof(commands[0]);
+const int builtinsCount =
+    sizeof(builtins) / sizeof(builtins[0]);

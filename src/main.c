@@ -4,11 +4,12 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include <bin/terminal/terminal.h>
+#include <bin/console/console.h>
 #include <drivers/keyboard/keyboard.h>
 
 #include <glib/gfx/context.h>
 #include <glib/buffer.h>
+#include <glib/fonts/font.h>
 
 // static uint32_t backbuffer[1280 * 800];
 
@@ -18,7 +19,7 @@ int main() {
 
     gfxContext_t ctx = gfxInit(fb, fb_info.width, fb_info.height, fb_info.pitch);
 
-    termMain(&ctx);
+    consoleMain(&ctx);
 
     gfxBeginFrame(&ctx);
     

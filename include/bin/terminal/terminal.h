@@ -3,6 +3,9 @@
 #include <glib/gfx/context.h>
 #include <glib/fonts/font.h>
 
+#define CELL(t, y, x) ((t)->screen[(y) * (t)->cols + (x)])
+#define PCELL(t, y, x) ((t)->previous[(y) * (t)->cols + (x)])
+
 typedef struct {
     char ch;
 
@@ -14,7 +17,8 @@ typedef struct {
 } termCell_t;
 
 typedef struct {
-    termCell_t (*screen)[120];
+    termCell_t* screen;
+    termCell_t* previous;
 
     int cursorX;
     int cursorY;
@@ -30,7 +34,7 @@ typedef struct {
     gfxContext_t* gfx;
 } terminal_t;
 
-void termMain(gfxContext_t* ctx);
+void termInit(terminal_t* term, gfxContext_t* ctx);
 void termSetFont(terminal_t* term, font_t* font);
 void termSetColor(terminal_t* term, uint32_t fg, uint32_t bg);
 void termPutChar(terminal_t* term, char c);

@@ -14,7 +14,7 @@ CFLAGS = \
 
 BUILD = ../../build/libc
 
-SRC_C := $(shell find src -name "*.c")
+SRC_C := $(shell find -name "*.c")
 OBJ := $(patsubst %.c,$(BUILD)/%.o,$(SRC_C))
 
 TARGET := $(BUILD)/libc.a

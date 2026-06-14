@@ -4,7 +4,7 @@
 #include <glib/gfx/context.h>
 
 typedef struct {
-    const void* bitmap;
+    const uint8_t* bitmap;
 
     int width;
     int height;
