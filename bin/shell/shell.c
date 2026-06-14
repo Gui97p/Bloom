@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include <bin/terminal/terminal.h>
+#include <bloom/theme.h>
 
 #include "builtins.h"
 #include "parser.h"
@@ -46,15 +47,14 @@ int shellExecute(terminal_t* term, char* line) {
     return runExternal(term, argc, argv);
 }
 
-void shellMain(terminal_t* term) {
-    termWriteEx(term, "Welcome to BloomOS!\n", 0xFF884D, term->currentBg);
+void shellMain(terminal_t* term, bloomTheme_t* theme) {
+    termWriteEx(term, "Welcome to BloomOS!\n", theme->accent_gold, term->currentBg);
 
     while (1) {
-        termWriteEx(term, "user@bloom", 0x1CB51C, term->currentBg);
-
-        termPutChar(term, ':');
-        termPutCharEx(term, '~', 0x008ADE, term->currentBg);
-        termWrite(term, " $ ");
+        termWriteEx(term, "root", theme->accent_bright, theme->bg_deep);
+        termWriteEx(term, "@",    theme->fg_dim,        theme->bg_deep);
+        termWriteEx(term, "bloom",theme->accent_purple, theme->bg_deep);
+        termWriteEx(term, ":~$ ", theme->fg_dim,        theme->bg_deep);
         
         char line[120];
         termFlush(term);

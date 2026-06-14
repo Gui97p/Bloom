@@ -31,10 +31,11 @@ typedef struct {
 
     font_t* font;
 
+    gfxSurface_t* viewport;
     gfxContext_t* gfx;
 } terminal_t;
 
-void termInit(terminal_t* term, gfxContext_t* ctx);
+void termInit(terminal_t* term, gfxContext_t* ctx, gfxSurface_t* surface);
 void termSetFont(terminal_t* term, font_t* font);
 void termSetColor(terminal_t* term, uint32_t fg, uint32_t bg);
 void termPutChar(terminal_t* term, char c);

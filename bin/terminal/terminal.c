@@ -30,19 +30,26 @@ static void termScroll(terminal_t* term) {
     memset(term->previous, 0xFF, term->rows * term->cols * sizeof(termCell_t));
 }
 
-void termInit(terminal_t* term, gfxContext_t* ctx) {
+void termInit(terminal_t* term, gfxContext_t* ctx, gfxSurface_t* surface) {
+    term->gfx = ctx;
+    term->viewport = surface;
+
+    term->viewport->x = 16;
+    term->viewport->y = 16;
+
+    term->viewport->width = ctx->width - 32;
+    term->viewport->height = ctx->height - 32;
+
     term->font = &font16x32;
 
-    term->cols = ctx->width / term->font->width;
-    term->rows = ctx->height / term->font->height;
+    term->cols = term->viewport->width / term->font->width;
+    term->rows = term->viewport->height / term->font->height;
 
     term->cursorX = 0;
     term->cursorY = 0;
 
     term->currentFg = 0xAAAAAA;
     term->currentBg = 0x1A001A;
-
-    term->gfx = ctx;
 
     size_t size = term->rows * term->cols * sizeof(termCell_t);
 
@@ -140,8 +147,8 @@ void termRenderer(terminal_t* term) {
 
             if (termCellEqual(cell, PCELL(term, row, col))) continue;
 
-            int x = 10 + col * term->font->width;
-            int y = row * term->font->height;
+            int x = term->viewport->x + col * term->font->width;
+            int y = term->viewport->y + row * term->font->height;
 
             fillRect(
                 term->gfx,
