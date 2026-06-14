@@ -59,7 +59,7 @@ void termMain(gfxContext_t* ctx) {
     
     termWriteEx(&term, "Welcome to BloomOS!\n", 0xFF884D, term.currentBg);
 
-    while (1) {    
+    while (1) {
         termWriteEx(&term, "user", 0x1CB51C, term.currentBg);
         termPutChar(&term, '@');
         termWriteEx(&term, "host", 0x1CB51C, term.currentBg);
