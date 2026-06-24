@@ -44,6 +44,8 @@ void setupWindows(gfxWindow_t* windows) {
     windows[0].onDraw = drawSolid;
     windows[0].onMouseEvent = NULL;
     windows[0].onKeyEvent = NULL;
+    strncpy(windows[0].title, "Tela 1", 7);
+    windows[0].titleBarHeight = 24;
     windows[0].userData = &colorA;
     windows[0].next = &windows[1];
 
@@ -57,6 +59,8 @@ void setupWindows(gfxWindow_t* windows) {
     windows[1].onDraw = drawSolid;
     windows[1].onMouseEvent = onClickToggle;
     windows[1].onKeyEvent = NULL;
+    strncpy(windows[1].title, "Tela 2", 7);
+    windows[1].titleBarHeight = 24;
     windows[1].userData = &colorB;
     windows[1].next = &windows[2];
 
@@ -70,6 +74,8 @@ void setupWindows(gfxWindow_t* windows) {
     windows[2].onDraw = drawSolid;
     windows[2].onMouseEvent = NULL;
     windows[2].onKeyEvent = NULL;
+    strncpy(windows[2].title, "Tela 3", 7);
+    windows[2].titleBarHeight = 24;
     windows[2].userData = &colorC;
     windows[2].next = NULL;
 }

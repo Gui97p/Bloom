@@ -1,16 +1,42 @@
 #include <string.h>
 #include <stdlib.h>
+
 #include <glib/gfx/context.h>
+
+#include <bloom/debug.h>
 
 void gfxCreateSurface(gfxSurface_t* surface, int width, int height) {
     surface->width = width;
     surface->height = height;
+    surface->capacity = width * height;
 
     surface->pixels = (uint32_t*)malloc(width * height * sizeof(uint32_t));
 }
 
 void gfxDestroySurface(gfxSurface_t* surface) {
     free(surface->pixels);
+}
+
+void gfxResizeSurface(gfxSurface_t* surface, int width, int height) {
+    if (width < 1) width = 1;
+    if (height < 1) height = 1;
+    if (width > 4096) width = 4096;
+    if (height > 4096) height = 4096;
+
+    if (width == surface->width && height == surface->height) return;
+
+    size_t needed = (size_t)width * (size_t)height;
+
+    if (needed > surface->capacity) {
+        uint32_t* newPixels = (uint32_t*)malloc(width * height * sizeof(uint32_t));
+        ASSERT(newPixels);
+        free(surface->pixels);
+
+        surface->pixels = newPixels;
+    }
+
+    surface->width = width;
+    surface->height = height;
 }
 
 void gfxInit(

@@ -7,6 +7,14 @@ typedef struct {
     gfxWindow_t* dragging;
     int dragOffsetX;
     int dragOffsetY;
+
+    gfxWindow_t* focusedWindow;
+
+    gfxWindow_t* resizingWindow;
+    int resizeStartW, resizeStartH;
+    int resizeStartMouseX, resizeStartMouseY;
+
+    int mouseX, mouseY;
 } compositorState_t;
 
 void compositorRenderFrame(gfxContext_t* ctx, gfxWindow_t* windows);

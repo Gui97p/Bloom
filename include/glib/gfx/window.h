@@ -10,10 +10,12 @@ typedef struct gfxWindow {
     int visible;
     int focused;
 
+    char title[64];
+    int titleBarHeight;
+
     void (*onDraw)(struct gfxWindow* win);
     void (*onMouseEvent)(struct gfxWindow* win, mouseEvent_t* ev);
     void (*onKeyEvent)(struct gfxWindow* win, keyEvent_t* ev);
-
     void* userData;
 
     struct gfxWindow* next;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
 
 typedef struct {
@@ -7,6 +8,8 @@ typedef struct {
 
     int width;
     int height;
+
+    size_t capacity;
 
     int dx0, dy0;
     int dx1, dy1;
@@ -25,6 +28,7 @@ typedef struct {
 void gfxInit(gfxContext_t* ctx, uint32_t* fb, int width, int height, int pitch);
 void gfxCreateSurface(gfxSurface_t* surface, int width, int height);
 void gfxDestroySurface(gfxSurface_t* surface);
+void gfxResizeSurface(gfxSurface_t* surface, int width, int height);
 
 void gfxBeginFrame(gfxContext_t* ctx);
 void gfxEndFrame(gfxContext_t* ctx);
