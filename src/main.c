@@ -91,7 +91,7 @@ int main() {
 
     gfxWindow_t windows[8];
     setupWindows(windows);
-
+    
     while (1) {
         compositorLoop(&ctx, windows);
     }

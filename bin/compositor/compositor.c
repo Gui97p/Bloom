@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include <glib/gfx/context.h>
 #include <glib/gfx/window.h>
 #include <glib/gfx/blit.h>
@@ -12,7 +14,11 @@
 static compositorState_t state;
 static int nextZ = 4;
 
-#define RESIZE_MARGIN 6
+static void sendWindowEvent(gfxWindow_t* win, windowEvent_t ev) {
+    if (win && win->onWindowEvent) {
+        win->onWindowEvent(win, &ev);
+    }
+}
 
 void compactZIndex(gfxWindow_t* windows) {
     int count = 0;
@@ -47,7 +53,7 @@ static void bringToFront(gfxWindow_t* windows, gfxWindow_t* win) {
 }
 
 void compositorRenderFrame(gfxContext_t* ctx, gfxWindow_t* windows) {
-    gfxWindow_t* sorted[8];
+    gfxWindow_t* sorted[MAX_WINDOWS];
     int count = 0;
     for (gfxWindow_t* w = windows; w; w = w->next) {
         if (w->visible) sorted[count++] = w;
@@ -103,38 +109,47 @@ void dispatchEvent(gfxWindow_t* windows, event_t* ev) {
     switch (ev->type) {
         case EVENT_MOUSE_DOWN: {
             gfxWindow_t* target = compositorHitTest(windows, ev->mouse.x, ev->mouse.y);
-            if (target != state.focusedWindow) {
-                if (state.focusedWindow) state.focusedWindow->focused = false;
-                state.focusedWindow = target;
-                if (state.focusedWindow) state.focusedWindow->focused = true;
-            }
-
             if (target) {    
                 int winBottom = target->y + target->titleBarHeight + target->surface.height;
                 int winRight = target->x + target->surface.width;
 
                 bool onResizeCorner = ev->mouse.x >= winRight - RESIZE_MARGIN && ev->mouse.y >= winBottom - RESIZE_MARGIN;
             
+                bringToFront(windows, target);
+
+                if (target != state.focusedWindow) {
+                    if (state.focusedWindow) {
+                        state.focusedWindow->focused = false;
+
+                        sendWindowEvent(state.focusedWindow, (windowEvent_t){.type = WINDOW_EVENT_UNFOCUS});
+                    }
+
+                    state.focusedWindow = target;
+
+                    if (state.focusedWindow) {
+                        state.focusedWindow->focused = true;
+
+                        sendWindowEvent(state.focusedWindow, (windowEvent_t){.type = WINDOW_EVENT_FOCUS});
+                    }
+                }
+                
+                bool onTitleBar = ev->mouse.y < target->y + target->titleBarHeight;
+                bool onCloseButton = onTitleBar && ev->mouse.x >= target->x + target->surface.width - 24;
+                
+                if (onCloseButton) {
+                    target->visible = false;
+                    sendWindowEvent(target, (windowEvent_t){.type = WINDOW_EVENT_CLOSE});
+                    if (state.focusedWindow == target) state.focusedWindow = NULL;
+                    break;
+                }
+                
                 if (onResizeCorner) {
                     state.resizingWindow = target;
                     state.resizeStartW = target->surface.width;
                     state.resizeStartH = target->surface.height;
                     state.resizeStartMouseX = ev->mouse.x;
                     state.resizeStartMouseY = ev->mouse.y;
-                }
-
-                bringToFront(windows, target);
-
-                bool onTitleBar = ev->mouse.y < target->y + target->titleBarHeight;
-                bool onCloseButton = onTitleBar && ev->mouse.x >= target->x + target->surface.width * 0.8;
-
-                if (onCloseButton) {
-                    target->visible = false;
-                    if (state.focusedWindow == target) state.focusedWindow = NULL;
-                    break;
-                }
-
-                if (onTitleBar) {
+                } else if (onTitleBar) {
                     state.dragging = target;
                     state.dragOffsetX = ev->mouse.x - target->x;
                     state.dragOffsetY = ev->mouse.y - target->y;
@@ -158,8 +173,19 @@ void dispatchEvent(gfxWindow_t* windows, event_t* ev) {
     
                 if (newW < 50) newW = 50;
                 if (newH < 50) newH = 50;
-    
-                gfxResizeSurface(&state.resizingWindow->surface, newW, newH);
+
+                if (abs(newW - state.resizingWindow->surface.width) >= 16 ||
+                    abs(newH - state.resizingWindow->surface.height) >= 16) {
+                    gfxResizeSurface(&state.resizingWindow->surface, newW, newH);
+                    
+                    (windowEvent_t){
+                        .type = WINDOW_EVENT_RESIZE,
+                        .resize = {
+                            .width = newW,
+                            .height = newH
+                        }
+                    };
+                }
             }
 
             if (state.dragging) {
@@ -185,7 +211,7 @@ void dispatchEvent(gfxWindow_t* windows, event_t* ev) {
             if (target && target->onMouseEvent) {
                 mouseEvent_t local = ev->mouse;
                 local.x -= target->x;
-                local.y -= target->y;
+                local.y -= target->y + target->titleBarHeight;
                 target->onMouseEvent(target, &local);
             }
             break;

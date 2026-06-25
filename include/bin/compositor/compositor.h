@@ -3,6 +3,8 @@
 #include <glib/gfx/context.h>
 #include <glib/gfx/window.h>
 
+#define RESIZE_MARGIN 6
+
 typedef struct {
     gfxWindow_t* dragging;
     int dragOffsetX;

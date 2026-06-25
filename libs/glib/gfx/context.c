@@ -28,11 +28,15 @@ void gfxResizeSurface(gfxSurface_t* surface, int width, int height) {
     size_t needed = (size_t)width * (size_t)height;
 
     if (needed > surface->capacity) {
-        uint32_t* newPixels = (uint32_t*)malloc(width * height * sizeof(uint32_t));
+        size_t newCapacity = surface->capacity * 2;
+        if (newCapacity < needed) newCapacity = needed;
+
+        uint32_t* newPixels = (uint32_t*)malloc(newCapacity * sizeof(uint32_t));
         ASSERT(newPixels);
         free(surface->pixels);
 
         surface->pixels = newPixels;
+        surface->capacity = newCapacity;
     }
 
     surface->width = width;
