@@ -6,8 +6,8 @@
 void gfxDrawRect(gfxSurface_t* surface, int x, int y, int width, int height, uint32_t color) {
     gfxDrawHLine(surface, x, x + width - 1, y, color);
     gfxDrawHLine(surface, x, x + width - 1, y + height - 1, color);
-    gfxDrawVLine(surface, y, y + height - 1, x, color);
-    gfxDrawVLine(surface, y, y + height - 1, x + width - 1, color);
+    gfxDrawVLine(surface, x, y, y + height - 1, color);
+    gfxDrawVLine(surface, x + width - 1, y, y + height - 1, color);
 }
 
 void gfxFillRect(gfxSurface_t* surface, int x, int y, int width, int height, uint32_t color) {

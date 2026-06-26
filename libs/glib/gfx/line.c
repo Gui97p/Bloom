@@ -24,7 +24,7 @@ void gfxDrawHLine(gfxSurface_t* surface, int x0, int x1, int y, uint32_t color) 
 }
 
 void gfxDrawVLine(gfxSurface_t* surface, int x, int y0, int y1, uint32_t color) {
-    if (x < 0 || x >= surface->height)
+    if (x < 0 || x >= surface->width)
         return;
 
     if (y0 > y1) {
@@ -34,7 +34,7 @@ void gfxDrawVLine(gfxSurface_t* surface, int x, int y0, int y1, uint32_t color) 
     }
 
     if (y0 < 0) y0 = 0;
-    if (y1 >= surface->height) y1 = surface->height;
+    if (y1 >= surface->height) y1 = surface->height - 1;
     if (y0 > y1) return;
 
     for (int y = y0; y <= y1; y++) {

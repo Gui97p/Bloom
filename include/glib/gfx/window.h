@@ -2,8 +2,10 @@
 
 #include <glib/gfx/context.h>
 #include <glib/input/event.h>
+#include <glib/widgets/widget.h>
 
 #define MAX_WINDOWS 64
+#define TITLE_BAR_HEIGHT 24
 
 typedef enum {
     WINDOW_EVENT_FOCUS,
@@ -30,14 +32,23 @@ typedef struct gfxWindow {
     int visible;
     int focused;
 
+    widget_t* focusedWidget;
+    widget_t* hoveredWidget;
+
     char title[64];
     int titleBarHeight;
 
     void (*onDraw)(struct gfxWindow* win);
-    void (*onMouseEvent)(struct gfxWindow* win, mouseEvent_t* ev);
-    void (*onKeyEvent)(struct gfxWindow* win, keyEvent_t* ev);
+    void (*onEvent)(struct gfxWindow* win, event_t* ev);
     void (*onWindowEvent)(struct gfxWindow* win, windowEvent_t* ev);
-    void* userData;
 
+    uint32_t backgroundColor;
+    bool drawBackground;
+
+    widget_t* widgets;
     struct gfxWindow* next;
 } gfxWindow_t;
+
+void gfxCreateWindow(gfxWindow_t* win, int width, int height, char* title);
+void windowAddWidget(gfxWindow_t* win, widget_t* widget);
+void drawWidgets(gfxWindow_t* win);
