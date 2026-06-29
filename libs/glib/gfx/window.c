@@ -62,14 +62,20 @@ void windowDispatchEvent(gfxWindow_t* win, event_t* ev) {
         }
 
         case EVENT_MOUSE_UP: {
-            widget_t* target = widgetHitTest(win, ev->mouse.x, ev->mouse.y);
-
-            if (target) {
-                sendWidgetInputEvent(target, ev);
+            if (win->capturedWidget) {
+                sendWidgetInputEvent(win->capturedWidget, ev);
+                win->capturedWidget = NULL;
+            } else {
+                widget_t* target = widgetHitTest(win, ev->mouse.x, ev->mouse.y);
+    
+                if (target) {
+                    sendWidgetInputEvent(target, ev);
+                }
             }
 
             break;
         }
+
         case EVENT_MOUSE_MOVE: {
             widget_t* target = widgetHitTest(win, ev->mouse.x, ev->mouse.y);
 
@@ -99,22 +105,30 @@ void windowDispatchEvent(gfxWindow_t* win, event_t* ev) {
 
 void gfxCreateWindow(gfxWindow_t* win, int width, int height, char* title) {
     gfxCreateSurface(&win->surface, width, height);
+    
     win->x = 0;
     win->y = 0;
     win->zIndex = 0;
+    
     win->visible = true;
     win->focused = false;
+    
     win->onDraw = NULL;
     win->onEvent = windowDispatchEvent;
     win->onWindowEvent = NULL;
+    
     strcpy(win->title, title);
     win->titleBarHeight = TITLE_BAR_HEIGHT;
+    
     win->drawBackground = true;
     win->backgroundColor = 0x222222;
+    
     win->next = NULL;
     win->widgets = NULL;
+
     win->focusedWidget = NULL;
     win->hoveredWidget = NULL;
+    win->capturedWidget = NULL;
 }
 
 void windowAddWidget(gfxWindow_t* win, widget_t* widget) {
@@ -134,10 +148,24 @@ void windowAddWidget(gfxWindow_t* win, widget_t* widget) {
             }
         }
     }
+
+    widget->window = win;
 }
 
 void drawWidgets(gfxWindow_t* win) {
     for (widget_t* w = win->widgets; w; w = w->next) {
         if (w->visible && w->draw) w->draw(w, &win->surface);
+    }
+}
+
+void windowCaptureMouse(gfxWindow_t* win, widget_t* widget) {
+    win->capturedWidget = widget;
+    widget->captureMouse = true;
+}
+
+void windowReleaseMouse(gfxWindow_t* win) {
+    if (win->capturedWidget) {
+        win->capturedWidget->captureMouse = false;
+        win->capturedWidget = NULL;
     }
 }

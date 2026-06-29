@@ -29,7 +29,10 @@ typedef enum {
     WIDGET_LABEL,
     WIDGET_BUTTON,
     WIDGET_PANEL,
-    WIDGET_TEXTBOX
+    WIDGET_TEXTBOX,
+    WIDGET_CHECKBOX,
+    WIDGET_PROGRESSBAR,
+    WIDGET_SLIDER
 } widgetType_t;
 
 typedef struct widget {
@@ -40,6 +43,7 @@ typedef struct widget {
 
     bool visible;
     bool focused;
+    bool captureMouse;
 
     widgetType_t type;
     void* userData;
@@ -49,6 +53,7 @@ typedef struct widget {
     void (*onEvent)(struct widget* widget, event_t* ev);
 
     struct widget* next;
+    gfxWindow_t* window;
 } widget_t;
 
 widget_t* widgetHitTest(gfxWindow_t* win, int x, int y);

@@ -68,3 +68,7 @@ void gfxDrawString(gfxSurface_t* surface, font_t* font, int x, int y, const char
         str++;
     }
 }
+
+int gfxMeasureString(font_t* font, int lenght) {
+    return lenght * font->width;
+}

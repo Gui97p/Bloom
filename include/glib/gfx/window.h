@@ -34,6 +34,7 @@ typedef struct gfxWindow {
 
     widget_t* focusedWidget;
     widget_t* hoveredWidget;
+    widget_t* capturedWidget;
 
     char title[64];
     int titleBarHeight;
@@ -52,3 +53,5 @@ typedef struct gfxWindow {
 void gfxCreateWindow(gfxWindow_t* win, int width, int height, char* title);
 void windowAddWidget(gfxWindow_t* win, widget_t* widget);
 void drawWidgets(gfxWindow_t* win);
+void windowCaptureMouse(gfxWindow_t* win, widget_t* widget);
+void windowReleaseMouse(gfxWindow_t* win);

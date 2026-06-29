@@ -11,6 +11,8 @@ typedef struct {
 
     uint32_t fg;
     uint32_t bg;
+
+    bool showBackground;
 } label_t;
 
 void labelInit(label_t* label, int x, int y, int w, int h, font_t* font, char* text);

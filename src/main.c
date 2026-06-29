@@ -21,6 +21,10 @@
 #include <glib/widgets/label.h>
 #include <glib/widgets/button.h>
 #include <glib/widgets/panel.h>
+#include <glib/widgets/textbox.h>
+#include <glib/widgets/checkbox.h>
+#include <glib/widgets/progressbar.h>
+#include <glib/widgets/slider.h>
 
 typedef struct {
     int count;
@@ -61,10 +65,29 @@ int main() {
     button.onClick = onButtonClick;
     button.widget.userData = &counter;
 
+    textBox_t tb;
+    char buffer[1024];
+    textBoxInit(&tb, 50, 150, 100, 50, buffer, 1024);
+
+    checkBox_t cb;
+    checkBoxInit(&cb, 50, 200, 30, 30, &font8x16, "hihiheha");
+
+    progressBar_t pb;
+    progressBarInit(&pb, 20, 250, 150, 20, 100);
+    pb.value = 110;
+
+    slider_t slider;
+    sliderInit(&slider, 10, 110, 280, 11, 100);
+    slider.value = 50;
+
     windowAddWidget(&window, &panel.widget);
     windowAddWidget(&window, &label.widget);
     windowAddWidget(&window, &button.widget);
-    
+    windowAddWidget(&window, &tb.widget);
+    windowAddWidget(&window, &cb.widget);
+    windowAddWidget(&window, &pb.widget);
+    windowAddWidget(&window, &slider.widget);
+
     while (1) {
         compositorLoop(&ctx, &window);
     }

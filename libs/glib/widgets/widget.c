@@ -27,6 +27,7 @@ void widgetInit(widget_t* widget, int x, int y, int w, int h, widgetType_t type)
 
     widget->visible = true;
     widget->focused = false;
+    widget->captureMouse = false;
 
     widget->type = type;
     widget->userData = NULL;
@@ -36,4 +37,5 @@ void widgetInit(widget_t* widget, int x, int y, int w, int h, widgetType_t type)
     widget->onEvent = NULL;
 
     widget->next = NULL;
+    widget->window = NULL;
 }
