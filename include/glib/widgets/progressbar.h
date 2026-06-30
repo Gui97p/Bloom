@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glib/widgets/widget.h>
+#include <glib/containers/widget.h>
 
 typedef struct {
     widget_t widget;

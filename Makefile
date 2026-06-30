@@ -28,15 +28,17 @@ GLIB = build/glib/glib.a
 CRT_SRC := $(shell find crt -name "*.S")
 ARCH_SRC := $(shell find arch -name "*.S")
 
-BIN_SRC := $(shell find bin -name "*.c")
-SRC_SRC := $(shell find src -name "*.c")
+APPS_SRC := $(shell find apps -name "*.c")
+SERVICES_SRC := $(shell find services -name "*.c")
+INIT_SRC := $(shell find init -name "*.c")
 DRIVER_SRC := $(shell find drivers -name "*.c")
 
 CRT_OBJ := $(patsubst %.S,$(BUILD)/%.o,$(CRT_SRC))
 ARCH_OBJ := $(patsubst %.S,$(BUILD)/%.o,$(ARCH_SRC))
 
-BIN_OBJ := $(patsubst %.c,$(BUILD)/%.o,$(BIN_SRC))
-SRC_OBJ := $(patsubst %.c,$(BUILD)/%.o,$(SRC_SRC))
+APPS_OBJ := $(patsubst %.c,$(BUILD)/%.o,$(APPS_SRC))
+SERVICES_OBJ := $(patsubst %.c,$(BUILD)/%.o,$(SERVICES_SRC))
+INIT_OBJ := $(patsubst %.c,$(BUILD)/%.o,$(INIT_SRC))
 DRIVER_OBJ := $(patsubst %.c,$(BUILD)/%.o,$(DRIVER_SRC))
 
 TARGET := build/init.elf
@@ -63,18 +65,20 @@ $(BUILD)/%.o: %.S
 $(TARGET): libs \
 	$(CRT_OBJ) \
 	$(ARCH_OBJ) \
-	$(SRC_OBJ) \
+	$(INIT_OBJ) \
 	$(DRIVER_OBJ) \
-	$(BIN_OBJ)
+	$(APPS_OBJ) \
+	$(SERVICES_OBJ)
 
 	$(CC) \
 	$(LDFLAGS) \
 	-o $@ \
 	$(CRT_OBJ) \
 	$(ARCH_OBJ) \
-	$(SRC_OBJ) \
+	$(INIT_OBJ) \
 	$(DRIVER_OBJ) \
-	$(BIN_OBJ) \
+	$(APPS_OBJ) \
+	$(SERVICES_OBJ) \
 	$(GLIB) \
 	$(LIBC)
 

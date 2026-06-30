@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glib/widgets/widget.h>
+#include <glib/containers/widget.h>
 #include <stdbool.h>
 
 typedef struct slider {

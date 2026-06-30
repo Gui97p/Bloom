@@ -1,6 +1,6 @@
 #include <glib/gfx/rect.h>
 #include <glib/gfx/circle.h>
-#include <glib/gfx/window.h>
+#include <glib/containers/widget.h>
 #include <glib/widgets/slider.h>
 #include <glib/input/event.h>
 
@@ -25,7 +25,7 @@ static void sliderWidgetEvent(widget_t* widget, widgetEvent_t* ev) {
     switch (ev->type) {
         case WIDGET_EVENT_UNFOCUS: {
             slider->dragging = false;
-            windowReleaseMouse(widget->window);
+            widgetContainerReleaseMouse(widget->container);
             break;
         }
 
@@ -45,7 +45,7 @@ static void sliderEvent(widget_t* widget, event_t* ev) {
 
             if (ev->mouse.x >= cx - r && ev->mouse.x <= cx + r) {
                 slider->dragging = true;
-                windowCaptureMouse(widget->window, widget);
+                widgetContainerCaptureMouse(widget->container, widget);
             }
 
             break;
@@ -53,7 +53,7 @@ static void sliderEvent(widget_t* widget, event_t* ev) {
 
         case EVENT_MOUSE_UP: {
             slider->dragging = false;
-            windowReleaseMouse(widget->window);
+            widgetContainerReleaseMouse(widget->container);
             break;
         }
 

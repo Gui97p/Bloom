@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glib/widgets/widget.h>
+#include <glib/containers/widget.h>
 #include <glib/fonts/font.h>
 
 typedef struct checkBox {
