@@ -18,6 +18,9 @@ typedef struct {
     int resizeStartMouseX, resizeStartMouseY;
 
     int mouseX, mouseY;
+    int lastMouseX, lastMouseY;
+
+    bool firstFrame;
 } compositorState_t;
 
-void compositorLoop(gfxContext_t* ctx, desktop_t* desktop);
+void compositorLoop(gfxContext_t* ctx, desktop_t* desktop, gfxWindow_t* windows);

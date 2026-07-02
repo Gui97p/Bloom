@@ -3,131 +3,137 @@
 #include <glib/gfx/rect.h>
 #include <glib/gfx/line.h>
 
-#include <glib/widgets/textbox.h>
+#include <glib/theme/ui.h>
 #include <glib/containers/widget.h>
 
-static inline void textBoxEnsureCursorVisible(textBox_t* tb) {
-    int visibleChars = (tb->widget.width - 8) / tb->font->width;
+static inline void textBoxEnsureCursorVisible(textBox_t* textBox) {
+    int visibleChars = (textBox->widget.width - 8) / textBox->font->width;
 
-    if ((int)tb->cursor < tb->scrollX)
-        tb->scrollX = tb->cursor;
+    if ((int)textBox->cursor < textBox->scrollX)
+        textBox->scrollX = textBox->cursor;
 
-    if ((int)tb->cursor > tb->scrollX + visibleChars)
-        tb->scrollX = tb->cursor - visibleChars + 1;
+    if ((int)textBox->cursor > textBox->scrollX + visibleChars)
+        textBox->scrollX = textBox->cursor - visibleChars + 1;
     
-    if ((int)tb->length <= visibleChars) {
-        tb->scrollX = 0;
+    if ((int)textBox->length <= visibleChars) {
+        textBox->scrollX = 0;
     } else {
-        int maxScroll = tb->length - visibleChars;
-        if (tb->scrollX < maxScroll)
-            tb->scrollX = maxScroll;
+        int maxScroll = textBox->length - visibleChars;
+        if (textBox->scrollX < maxScroll)
+            textBox->scrollX = maxScroll;
     }
 }
 
-static inline void textBoxInsert(textBox_t* tb, char c) {
-    if (tb->length + 1 >= tb->capacity)
+static inline void textBoxInsert(textBox_t* textBox, char c) {
+    if (textBox->length + 1 >= textBox->capacity)
         return;
     
-    memmove(tb->buffer + tb->cursor + 1, tb->buffer + tb->cursor, tb->length - tb->cursor + 1);
+    memmove(textBox->buffer + textBox->cursor + 1, textBox->buffer + textBox->cursor, textBox->length - textBox->cursor + 1);
 
-    tb->buffer[tb->cursor] = c;
+    textBox->buffer[textBox->cursor] = c;
 
-    tb->cursor++;
-    tb->length++;
+    textBox->cursor++;
+    textBox->length++;
 
-    textBoxEnsureCursorVisible(tb);
+    textBoxEnsureCursorVisible(textBox);
 }
 
-static inline void textBoxBackspace(textBox_t* tb) {
-    if (tb->cursor == 0)
+static inline void textBoxBackspace(textBox_t* textBox) {
+    if (textBox->cursor == 0)
         return;
 
     memmove(
-        tb->buffer + tb->cursor - 1,
-        tb->buffer + tb->cursor,
-        tb->length - tb->cursor + 1
+        textBox->buffer + textBox->cursor - 1,
+        textBox->buffer + textBox->cursor,
+        textBox->length - textBox->cursor + 1
     );
 
-    tb->cursor--;
-    tb->length--;
+    textBox->cursor--;
+    textBox->length--;
 
-    textBoxEnsureCursorVisible(tb);
+    textBoxEnsureCursorVisible(textBox);
 }
 
-static inline void textBoxDelete(textBox_t* tb) {
-    if (tb->cursor >= tb->length)
+static inline void textBoxDelete(textBox_t* textBox) {
+    if (textBox->cursor >= textBox->length)
         return;
 
     memmove(
-        tb->buffer + tb->cursor,
-        tb->buffer + tb->cursor + 1,
-        tb->length - tb->cursor
+        textBox->buffer + textBox->cursor,
+        textBox->buffer + textBox->cursor + 1,
+        textBox->length - textBox->cursor
     );
 
-    tb->length--;
+    textBox->length--;
 
-    textBoxEnsureCursorVisible(tb);
+    textBoxEnsureCursorVisible(textBox);
 }
 
 static void textBoxDraw(widget_t* widget, gfxSurface_t* surface) {
-    textBox_t* tb = (textBox_t*)widget;
+    textBox_t* textBox = (textBox_t*)widget;
 
-    gfxFillRect(surface, widget->x, widget->y, widget->width, widget->height, tb->bg);
-    gfxDrawRect(surface, widget->x, widget->y, widget->width, widget->height, widget->focused ? 0x4A90E2 : 0x808080);
+    textBoxStyle_t* style = &textBox->style;
 
-    int visibleChars = (widget->width - 8) / tb->font->width;
-    char backup = tb->buffer[tb->scrollX + visibleChars];
+    font_t* font = textBox->font;
+    if (!font)
+        font = widget->container->theme->defaultFont;
 
-    if (tb->scrollX + visibleChars < tb->length)
-        tb->buffer[tb->scrollX + visibleChars] = 0;
+    gfxFillRect(surface, widget->x, widget->y, widget->width, widget->height, style->bg);
+    gfxDrawFrame(surface, widget->x, widget->y, widget->width, widget->height, &style->frame);
 
-    gfxDrawString(surface, tb->font, widget->x + 4, widget->y + 4, tb->buffer + tb->scrollX, tb->fg);
+    int visibleChars = (widget->width - 8) / font->width;
+    char backup = textBox->buffer[textBox->scrollX + visibleChars];
 
-    if (tb->scrollX + visibleChars < tb->length)
-        tb->buffer[tb->scrollX + visibleChars] = backup;
+    if (textBox->scrollX + visibleChars < textBox->length)
+        textBox->buffer[textBox->scrollX + visibleChars] = 0;
 
-    if (widget->focused && tb->cursorVisible) {
-        int cursorX = widget->x + 4 + gfxMeasureString(tb->font, (tb->cursor - tb->scrollX));
+    gfxDrawString(surface, textBox->font, widget->x + 4, widget->y + 4, textBox->buffer + textBox->scrollX, style->fg);
 
-        gfxDrawVLine(surface, cursorX, widget->y + 3, widget->y + tb->font->height + 3, tb->fg);
+    if (textBox->scrollX + visibleChars < textBox->length)
+        textBox->buffer[textBox->scrollX + visibleChars] = backup;
+
+    if (widget->focused && textBox->cursorVisible) {
+        int cursorX = widget->x + 4 + gfxMeasureString(textBox->font, (textBox->cursor - textBox->scrollX));
+
+        gfxDrawVLine(surface, cursorX, widget->y + 3, widget->y + textBox->font->height + 3, style->fg);
     }
 }
 
 static void textBoxEvent(widget_t* widget, event_t* ev) {
-    textBox_t* tb = (textBox_t*)widget;
+    textBox_t* textBox = (textBox_t*)widget;
 
     switch (ev->type) {
         case EVENT_KEY_DOWN: {
             switch (ev->key.key) {
                 case KEY_BACKSPACE: {
-                    textBoxBackspace(tb);
+                    textBoxBackspace(textBox);
                     break;
                 }
 
                 case KEY_DELETE: {
-                    textBoxDelete(tb);
+                    textBoxDelete(textBox);
                     break;
                 }
 
                 case KEY_HOME: {
-                    tb->cursor = 0;
+                    textBox->cursor = 0;
                     break;
                 }
 
                 case KEY_END: {
-                    tb->cursor = tb->length;
+                    textBox->cursor = textBox->length;
                     break;
                 }
 
                 case KEY_LEFT: {
-                    if (tb->cursor > 0)
-                        tb->cursor--;
+                    if (textBox->cursor > 0)
+                        textBox->cursor--;
                     break;
                 }
 
                 case KEY_RIGHT: {
-                    if (tb->cursor < tb->length)
-                        tb->cursor++;
+                    if (textBox->cursor < textBox->length)
+                        textBox->cursor++;
                     break;
                 }
                 
@@ -135,28 +141,28 @@ static void textBoxEvent(widget_t* widget, event_t* ev) {
                     char c = keyboardEventToAscii(&ev->key);
 
                     if (c > 32 && c < 126) {
-                        textBoxInsert(tb, c);
+                        textBoxInsert(textBox, c);
                     }
 
                     break;
                 }
             }
-            textBoxEnsureCursorVisible(tb);
+            textBoxEnsureCursorVisible(textBox);
 
             break;
         }
 
         case EVENT_MOUSE_DOWN: {
-            int pos = (ev->mouse.x - 4) / tb->font->width;
+            int pos = (ev->mouse.x - 4) / textBox->font->width;
         
             if (pos < 0) pos = 0;
 
-            tb->cursor = tb->scrollX + pos;
+            textBox->cursor = textBox->scrollX + pos;
 
-            if (tb->cursor > tb->length)
-                tb->cursor = tb->length;
+            if (textBox->cursor > textBox->length)
+                textBox->cursor = textBox->length;
             
-            textBoxEnsureCursorVisible(tb);
+            textBoxEnsureCursorVisible(textBox);
 
             break;
         }
@@ -167,16 +173,16 @@ static void textBoxEvent(widget_t* widget, event_t* ev) {
 }
 
 static void textBoxWidgetEvent(widget_t* widget, widgetEvent_t* ev) {
-    textBox_t* tb = (textBox_t*)widget;
+    textBox_t* textBox = (textBox_t*)widget;
 
     switch (ev->type) {
         case WIDGET_EVENT_FOCUS:
-            tb->cursorVisible = true;
+            textBox->cursorVisible = true;
             break;
         
         case WIDGET_EVENT_UNFOCUS: {
-            tb->cursorVisible = false;
-            tb->selectionStart = tb->selectionEnd = tb->cursor;
+            textBox->cursorVisible = false;
+            textBox->selectionStart = textBox->selectionEnd = textBox->cursor;
             break;
         }
 
@@ -185,12 +191,30 @@ static void textBoxWidgetEvent(widget_t* widget, widgetEvent_t* ev) {
     }
 }
 
-void textBoxInit(textBox_t* textBox, int x, int y, int w, int h, char* buffer, size_t capacity) {
+static void textBoxApplyTheme(widget_t* widget) {
+    textBox_t* textBox = (textBox_t*)widget;
+    textBoxStyle_t* theme = &widget->container->theme->textBox;
+    textBox->style = *theme;
+
+    WIDGET_APPLY_IF(textBox, fg, TEXTBOX_CUSTOM_FG, theme->fg);
+    WIDGET_APPLY_IF(textBox, bg, TEXTBOX_CUSTOM_BG, theme->bg);
+    WIDGET_APPLY_IF(textBox, selectionBg, TEXTBOX_CUSTOM_SELECTION_BG, theme->selectionBg);
+
+    WIDGET_FRAME_APPLY_IF(textBox, border, TEXTBOX_CUSTOM_BORDER, theme->frame.border);
+    WIDGET_FRAME_APPLY_IF(textBox, borderRadius, TEXTBOX_CUSTOM_BORDER_RADIUS, theme->frame.borderRadius);
+    WIDGET_FRAME_APPLY_IF(textBox, borderSize,  TEXTBOX_CUSTOM_BORDER_SIZE, theme->frame.borderSize);
+    WIDGET_FRAME_APPLY_IF(textBox, borderColor, TEXTBOX_CUSTOM_BORDER_COLOR, theme->frame.borderColor);
+}
+
+void textBoxInit(textBox_t* textBox, widgetContainer_t* container, int x, int y, int w, int h, char* buffer, size_t capacity) {
     widgetInit(&textBox->widget, x, y, w, h, WIDGET_TEXTBOX);
 
     textBox->widget.draw = textBoxDraw;
     textBox->widget.onEvent = textBoxEvent;
     textBox->widget.onWidgetEvent = textBoxWidgetEvent;
+    textBox->widget.applyTheme = textBoxApplyTheme;
+    
+    textBox->customFields = TEXTBOX_CUSTOM_NONE;
 
     textBox->font = &font8x16;
 
@@ -214,7 +238,6 @@ void textBoxInit(textBox_t* textBox, int x, int y, int w, int h, char* buffer, s
     textBox->selectionEnd = textBox->cursor;
 
     textBox->scrollX = 0;
-
-    textBox->fg = 0xFFFFFF;
-    textBox->bg = 0x404040;
+    
+    widgetContainerAddWidget(container, &textBox->widget);
 }

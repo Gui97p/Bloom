@@ -45,10 +45,10 @@ typedef struct gfxWindow {
     void (*onWindowEvent)(struct gfxWindow* win, windowEvent_t* ev);
 
     struct gfxWindow* next;
+
+    bool dirty;
 } gfxWindow_t;
 
 void gfxCreateWindow(gfxWindow_t* win, int width, int height, char* title);
-void windowAddWidget(gfxWindow_t* win, widget_t* widget);
 void drawWidgets(gfxWindow_t* win);
-void windowCaptureMouse(gfxWindow_t* win, widget_t* widget);
-void windowReleaseMouse(gfxWindow_t* win);
+void gfxWindowInvalidate(gfxWindow_t* window);

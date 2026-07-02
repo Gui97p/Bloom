@@ -1,21 +1,36 @@
+#include <string.h>
+
 #include <glib/gfx/rect.h>
-#include <glib/widgets/button.h>
+#include <glib/color/color.h>
+#include <glib/theme/ui.h>
+
+static uint32_t buttonColor(button_t* button) {
+    if (button->pressed) {
+        return button->style.bgPress;
+    } else if (button->hovered) {
+        return button->style.bgHover;
+    } else {
+        return button->style.bg;
+    }
+}
 
 static void buttonDraw(widget_t* widget, gfxSurface_t* surface) {
     button_t* button = (button_t*)widget;
 
-    uint32_t color = button->bgColor;
+    buttonStyle_t* style = &button->style;
+    font_t* font = button->font;
 
-    if (button->pressed) {
-        color = button->pressedColor;
-    } else if (button->hovered) {
-        color = button->hoverColor;
-    }
+    if (!font)
+        font = widget->container->theme->defaultFont;
 
-    gfxFillRect(surface, widget->x, widget->y, widget->width, widget->height, color);
-    gfxDrawRect(surface, widget->x, widget->y, widget->width, widget->height, 0x000000);
+    gfxFillRect(surface, widget->x, widget->y, widget->width, widget->height, buttonColor(button));
+    gfxDrawFrame(surface, widget->x, widget->y, widget->width, widget->height, &style->frame);
 
-    gfxDrawString(surface, button->font, widget->x + 6, widget->y + 6, button->text, button->textColor);
+    int tw = gfxMeasureString(font, strlen(button->text));
+    int tx = widget->x + (widget->width - tw)/2;
+    int ty = widget->y + (widget->height - font->height)/2;
+
+    gfxDrawString(surface, font, tx, ty, button->text, style->fg);
 }
 
 static void buttonEvent(widget_t* widget, event_t* ev) {
@@ -32,6 +47,8 @@ static void buttonEvent(widget_t* widget, event_t* ev) {
                 button->onClick(button, button->widget.userData);
 
             button->pressed = false;
+
+            break;
         }
 
         default:
@@ -64,23 +81,39 @@ static void buttonWidgetEvent(widget_t* widget, widgetEvent_t* ev) {
     }
 }
 
-void buttonInit(button_t* button, int x, int y, int w, int h, font_t* font, char* text) {
-    widgetInit(&button->widget, x, y, w, h, WIDGET_BUTTON);
+static void buttonApplyTheme(widget_t* widget) {
+    button_t* button = (button_t*)widget;
+    buttonStyle_t* theme = &widget->container->theme->button;
+    button->style = *theme;
 
+    WIDGET_APPLY_IF(button, fg, BUTTON_CUSTOM_FG, theme->fg);
+    WIDGET_APPLY_IF(button, bg, BUTTON_CUSTOM_BG, theme->bg);
+    WIDGET_APPLY_IF(button, bgHover, BUTTON_CUSTOM_BG_HOVER, theme->bgHover);
+    WIDGET_APPLY_IF(button, bgPress, BUTTON_CUSTOM_BG_PRESS, theme->bgPress);
+
+    WIDGET_FRAME_APPLY_IF(button, border, BUTTON_CUSTOM_BORDER, theme->frame.border);
+    WIDGET_FRAME_APPLY_IF(button, borderRadius, BUTTON_CUSTOM_BORDER_RADIUS, theme->frame.borderRadius);
+    WIDGET_FRAME_APPLY_IF(button, borderSize,  BUTTON_CUSTOM_BORDER_SIZE, theme->frame.borderSize);
+    WIDGET_FRAME_APPLY_IF(button, borderColor, BUTTON_CUSTOM_BORDER_COLOR, theme->frame.borderColor);
+}
+
+void buttonInit(button_t* button, widgetContainer_t* container, int x, int y, int w, int h, char* text) {
+    widgetInit(&button->widget, x, y, w, h, WIDGET_BUTTON);
+    
     button->widget.draw = buttonDraw;
     button->widget.onEvent = buttonEvent;
     button->widget.onWidgetEvent = buttonWidgetEvent;
+    button->widget.applyTheme = buttonApplyTheme;
+    
+    button->customFields = BUTTON_CUSTOM_NONE;
 
-    button->font = font;
+    button->font = NULL;
     button->text = text;
-    button->textColor = 0xFFFFFF;
-
-    button->bgColor = 0x606060;
-    button->hoverColor = 0x707070;
-    button->pressedColor = 0x505050;
-
+    
     button->hovered = false;
     button->pressed = false;
-
+    
     button->onClick = NULL;
+    
+    widgetContainerAddWidget(container, &button->widget);
 }

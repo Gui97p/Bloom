@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <apps/terminal/terminal.h>
 #include <glib/gfx/rect.h>
+#include <glib/color/color.h>
 #include <bloom/theme.h>
+
+bloomTheme_t bloomTheme;
 
 static uint32_t parseHexColor(const char* str) {
     while (*str == ' ' || *str == '\t') str++;
@@ -24,60 +26,197 @@ static char* trim(char* s) {
     return s;
 }
 
+void uiThemeBuild(uiTheme_t* theme) {
+    theme->button = (buttonStyle_t){
+        .fg = theme->pallete.foreground,
+        
+        .bg = theme->pallete.primary,
+        .bgHover = colorLighten(theme->pallete.primary, COLOR_HOVER_AMOUNT),
+        .bgPress = colorDarken(theme->pallete.primary, COLOR_ACTIVE_AMOUNT),
+        
+        .frame = {
+            .border = true,
+            .borderSize = 1,
+            .borderColor = theme->pallete.border,
+            .borderRadius = 0,
+        }
+    };
+
+    theme->label = (labelStyle_t){
+        .fg = theme->pallete.foreground,
+        .bg = theme->pallete.surface,
+
+        .frame = {
+            .border = false,
+            .borderSize = 1,
+            .borderColor = theme->pallete.border,
+            .borderRadius = 0,
+        }
+        
+    };
+
+    theme->panel = (panelStyle_t){
+        .bg = theme->pallete.surface,
+        
+        .frame = {
+            .border = true,
+            .borderSize = 1,
+            .borderColor = theme->pallete.border,
+            .borderRadius = 0,
+        }
+    };
+
+    theme->textBox = (textBoxStyle_t){
+        .fg = theme->pallete.foreground,
+        .bg = theme->pallete.surfaceVariant,
+        
+        .cursorColor = theme->pallete.primary,
+        .selectionBg = colorLighten(theme->pallete.primary, COLOR_SELECTION_AMOUNT),
+        
+        .frame = {
+            .border = true,
+            .borderSize = 1,
+            .borderColor = theme->pallete.border,
+            .borderRadius = 0,
+        }
+    };
+
+    theme->checkBox = (checkBoxStyle_t){
+        .bg = theme->pallete.surface,
+        .bgHover = colorLighten(theme->pallete.surface, COLOR_HOVER_AMOUNT),
+        .bgActive = theme->pallete.primary,
+        .bgHoverActive = colorLighten(theme->pallete.primary, COLOR_HOVER_AMOUNT),
+        
+        .frame = {
+            .border = true,
+            .borderSize = 1,
+            .borderColor = theme->pallete.border,
+            .borderRadius = 0,
+        }
+    };
+
+    theme->progressBar = (progressBarStyle_t){
+        .fg = theme->pallete.primary,
+        .bg = theme->pallete.surface,
+
+        .frame = {
+            .border = true,
+            .borderSize = 1,
+            .borderColor = theme->pallete.border,
+            .borderRadius = 0,
+        }
+    };
+
+    theme->slider = (sliderStyle_t){
+        .fg = theme->pallete.surfaceVariant,
+        .bg = theme->pallete.surface,
+        .knob = theme->pallete.primary,
+
+        .frame = {
+            .border = true,
+            .borderSize = 1,
+            .borderColor = theme->pallete.border,
+            .borderRadius = 0,
+        }
+    };
+}
+
 bloomTheme_t themeLoad(const char* path) {
     bloomTheme_t theme = BLOOM_THEME_DEFAULT;
 
     FILE* f = fopen(path, "r");
-    if (!f) return theme;
+    if (!f) {
+        uiThemeBuild(&theme.ui);
+        return theme;
+    }
 
     char buf[1024];
     size_t n = fread(buf, 1, sizeof(buf) - 1, f);
     fclose(f);
 
-    if (n == 0) return theme;
+    if (n == 0) {
+        uiThemeBuild(&theme.ui);
+        return theme;
+    }
+
     buf[n] = '\0';
 
-    char *line = buf;
+    char* line = buf;
     while (line && *line) {
         char* next = strchr(line, '\n');
         if (next) *next++ = '\0';
 
         char* s = trim(line);
+
         if (*s && *s != '#' && *s != '[') {
             char* eq = strchr(s, '=');
+
             if (eq) {
                 *eq = '\0';
+
                 char* key = trim(s);
                 char* val = trim(eq + 1);
 
-                if      (!strcmp(key, "bg_deep"))       theme.bg_deep       = parseHexColor(val);
-                else if (!strcmp(key, "bg_surface"))     theme.bg_surface    = parseHexColor(val);
-                else if (!strcmp(key, "fg_primary"))     theme.fg_primary    = parseHexColor(val);
-                else if (!strcmp(key, "fg_dim"))         theme.fg_dim        = parseHexColor(val);
-                else if (!strcmp(key, "accent_purple"))  theme.accent_purple = parseHexColor(val);
-                else if (!strcmp(key, "accent_bright"))  theme.accent_bright = parseHexColor(val);
-                else if (!strcmp(key, "accent_teal"))    theme.accent_teal   = parseHexColor(val);
-                else if (!strcmp(key, "accent_gold"))    theme.accent_gold   = parseHexColor(val);
-                else if (!strcmp(key, "accent_pink"))    theme.accent_pink   = parseHexColor(val);
-                else if (!strcmp(key, "cursor_blink"))   theme.cursor_blink  = parseBool(val);
-                else if (!strcmp(key, "enabled"))        theme.statusbar_enabled = parseBool(val);
-                else if (!strcmp(key, "show_uptime"))    theme.show_uptime   = parseBool(val);
-                else if (!strcmp(key, "show_mem"))       theme.show_mem      = parseBool(val);
-                else if (!strcmp(key, "show_time"))      theme.show_time     = parseBool(val);
+                if      (!strcmp(key, "background"))      theme.ui.pallete.background      = parseHexColor(val);
+                else if (!strcmp(key, "surface"))         theme.ui.pallete.surface         = parseHexColor(val);
+                else if (!strcmp(key, "surfaceVariant"))  theme.ui.pallete.surfaceVariant  = parseHexColor(val);
+
+                else if (!strcmp(key, "foreground"))      theme.ui.pallete.foreground      = parseHexColor(val);
+                else if (!strcmp(key, "foregroundDim"))   theme.ui.pallete.foregroundDim   = parseHexColor(val);
+
+                else if (!strcmp(key, "border"))          theme.ui.pallete.border          = parseHexColor(val);
+                else if (!strcmp(key, "borderLight"))     theme.ui.pallete.borderLight     = parseHexColor(val);
+
+                else if (!strcmp(key, "primary"))         theme.ui.pallete.primary         = parseHexColor(val);
+                else if (!strcmp(key, "secondary"))       theme.ui.pallete.secondary       = parseHexColor(val);
+                else if (!strcmp(key, "tertiary"))        theme.ui.pallete.tertiary        = parseHexColor(val);
+
+                else if (!strcmp(key, "success"))         theme.ui.pallete.success         = parseHexColor(val);
+                else if (!strcmp(key, "warning"))         theme.ui.pallete.warning         = parseHexColor(val);
+                else if (!strcmp(key, "error"))           theme.ui.pallete.error           = parseHexColor(val);
+
+                else if (!strcmp(key, "desktopBackground")) theme.desktopBackground = parseHexColor(val);
+                else if (!strcmp(key, "taskbarEnabled"))    theme.taskbarEnabled = parseBool(val);
             }
         }
+
         line = next;
     }
+
+    uiThemeBuild(&theme.ui);
 
     return theme;
 }
 
 void setupThemeFile() {
     FILE* f = fopen("/theme.conf", "w+");
+    if (!f)
+        return;
 
-    char* content = "[palette]\nbg_deep       = #0f0a1a\nbg_surface    = #13091f\nfg_primary    = #c5b3e6\nfg_dim        = #7a6899\naccent_purple = #9d7fd4\naccent_bright = #cc88ff\naccent_teal   = #80d4c8\naccent_gold   = #e8c47a\naccent_pink   = #e685b5\n\n[shell]\nprompt_style  = user@host:path$\ncursor_style  = block\ncursor_blink  = true\n\n[statusbar]\nenabled       = true\nshow_uptime   = true\nshow_mem      = true\nshow_time     = true";
+    const char* content =
+        "[palette]\n"
+        "background       = #0F0A1A\n"
+        "surface          = #13091F\n"
+        "surfaceVariant   = #1A112A\n"
+        "\n"
+        "foreground       = #C5B3E6\n"
+        "foregroundDim    = #7A6899\n"
+        "\n"
+        "border           = #6B5A88\n"
+        "borderLight      = #A087D6\n"
+        "\n"
+        "primary          = #9D7FD4\n"
+        "secondary        = #CC88FF\n"
+        "tertiary         = #E685B5\n"
+        "\n"
+        "success          = #80D4C8\n"
+        "warning          = #E8C47A\n"
+        "error            = #D45A7A\n"
+        "\n"
+        "[desktop]\n"
+        "desktopBackground = #0F0A1A\n"
+        "taskbarEnabled    = true\n";
 
     fwrite(content, 1, strlen(content), f);
-
     fclose(f);
 }

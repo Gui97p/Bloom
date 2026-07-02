@@ -104,19 +104,27 @@ void widgetContainerDispatchEvent(widgetContainer_t* container, event_t* ev) {
     }
 }
 
-widget_t* widgetHitTest(widgetContainer_t* container, int x, int y) {
-    widget_t* topHit = NULL;
+void widgetContainerAddWidget(widgetContainer_t* container, widget_t* widget) {
+    widget->next = NULL;
 
-    for (widget_t* w = container->widgets; w; w = w->next) {
-        if (!w->visible) continue;
-        
-        if (x >= w->x && x < w->x + w->width &&
-            y >= w->y && y < w->y + w->height) {
-            topHit = w;
+    if (!container->widgets) {
+        container->widgets = widget;
+    } else if (widget->zIndex < container->widgets->zIndex) {
+        widget->next = container->widgets;
+        container->widgets = widget;
+    } else {
+        for (widget_t* w = container->widgets; w; w = w->next) {
+            if (!w->next || widget->zIndex <= w->next->zIndex) {
+                widget->next = w->next;
+                w->next = widget;
+                break;
+            }
         }
     }
 
-    return topHit;
+    widget->container = container;
+
+    widgetApplyTheme(widget);
 }
 
 void widgetInit(widget_t* widget, int x, int y, int w, int h, widgetType_t type) {
@@ -138,16 +146,52 @@ void widgetInit(widget_t* widget, int x, int y, int w, int h, widgetType_t type)
     widget->draw = NULL;
     widget->onWidgetEvent = NULL;
     widget->onEvent = NULL;
+    widget->applyTheme = NULL;
 
-    widget->next = NULL;
     widget->container = NULL;
+    widget->next = NULL;
 }
 
-void widgetContainerInit(widgetContainer_t* container) {
+widget_t* widgetHitTest(widgetContainer_t* container, int x, int y) {
+    widget_t* topHit = NULL;
+
+    for (widget_t* w = container->widgets; w; w = w->next) {
+        if (!w->visible) continue;
+        
+        if (x >= w->x && x < w->x + w->width &&
+            y >= w->y && y < w->y + w->height) {
+            topHit = w;
+        }
+    }
+
+    return topHit;
+}
+
+void widgetApplyTheme(widget_t* widget) {
+    if (!widget->container)
+        return;
+    
+    if (widget->applyTheme)
+        widget->applyTheme(widget);
+}
+
+void widgetContainerInit(widgetContainer_t* container, uiTheme_t* theme) {
     container->widgets = NULL;
     container->capturedWidget = NULL;
     container->focusedWidget = NULL;
     container->hoveredWidget = NULL;
+    container->theme = theme;
+}
+
+void widgetContainerSetTheme(widgetContainer_t* container, uiTheme_t* theme) {
+    if (container->theme == theme)
+        return;
+
+    container->theme = theme;
+
+    for (widget_t* w = container->widgets; w; w = w->next) {
+        widgetApplyTheme(w);
+    }
 }
 
 void widgetContainerCaptureMouse(widgetContainer_t* container, widget_t* widget) {

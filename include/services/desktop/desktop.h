@@ -11,7 +11,7 @@ typedef struct {
 } taskbar_t;
 
 typedef struct {
-    gfxSurface_t* surface;
+    gfxSurface_t surface;
     widgetContainer_t container;
 
     taskbar_t taskbar;

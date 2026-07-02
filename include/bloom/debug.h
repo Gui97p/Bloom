@@ -8,6 +8,10 @@ do { \
         panic(__FILE__, __LINE__, #expr); \
 } while (0)
 
+#define HOLD(point) \
+    serialPrintf("Holding point '%s'\n", point); \
+    while (1) {}
+
 #ifdef DEBUG
 #define DPRINTF(...) serialPrintf(__VA_ARGS__)
 #else

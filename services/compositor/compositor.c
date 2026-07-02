@@ -10,12 +10,11 @@
 #include <services/compositor/compositor.h>
 #include <services/desktop/desktop.h>
 
+#include <bloom/theme.h>
 #include <bloom/debug.h>
 
-static gfxWindow_t* windows;
 static compositorState_t state;
 static int nextZ = 0;
-static desktop_t desktop;
 
 static void sendWindowEvent(gfxWindow_t* win, windowEvent_t ev) {
     if (win && win->onWindowEvent) {
@@ -98,12 +97,18 @@ static void compositorDrawWindows(gfxSurface_t* surface, gfxWindow_t* windows) {
         int r = w->titleBarHeight * 0.3;
         gfxFillCircle(surface, w->x + w->surface.width - 2 * r, (w->y + w->titleBarHeight / 2), r, 0xFF0000);
         
-        gfxFillRect(&w->surface, 0, 0, w->surface.width, w->surface.height, w->backgroundColor);
         
-        if (w->onDraw) w->onDraw(w);
-
-        drawWidgets(w);
-
+        if (w->dirty) {
+            gfxFillRect(&w->surface, 0, 0, w->surface.width, w->surface.height, w->backgroundColor);
+            
+            if (w->onDraw) w->onDraw(w);
+    
+            drawWidgets(w);
+            
+            w->dirty = false;
+        }
+        gfxDrawRect(surface, w->x-1, w->y-1, w->surface.width + 2, w->surface.height + w->titleBarHeight + 2, bloomTheme.ui.pallete.borderLight);
+        
         gfxBlit(surface, &w->surface, w->x, w->y + w->titleBarHeight);
     }
 }
@@ -129,7 +134,7 @@ static gfxWindow_t* compositorHitTest(gfxWindow_t* windows, int screenX, int scr
     return topHit;
 }
 
-static void dispatchEvent(gfxWindow_t* windows, event_t* ev) {
+static void dispatchEvent(gfxContext_t* ctx, gfxWindow_t* windows, event_t* ev) {
     switch (ev->type) {
         case EVENT_MOUSE_DOWN: {
             gfxWindow_t* target = compositorHitTest(windows, ev->mouse.x, ev->mouse.y);
@@ -185,6 +190,9 @@ static void dispatchEvent(gfxWindow_t* windows, event_t* ev) {
         }
 
         case EVENT_MOUSE_MOVE: {
+            state.lastMouseX = state.mouseX;
+            state.lastMouseY = state.mouseY;
+
             state.mouseX = ev->mouse.x;
             state.mouseY = ev->mouse.y;
 
@@ -199,19 +207,38 @@ static void dispatchEvent(gfxWindow_t* windows, event_t* ev) {
                     abs(newH - state.resizingWindow->surface.height) >= 16) {
                     gfxResizeSurface(&state.resizingWindow->surface, newW, newH);
                     
-                    (windowEvent_t){
+                    sendWindowEvent(state.resizingWindow, (windowEvent_t){
                         .type = WINDOW_EVENT_RESIZE,
                         .resize = {
                             .width = newW,
                             .height = newH
                         }
-                    };
+                    });
                 }
             }
 
             if (state.dragging) {
+                int oldX = state.dragging->x;
+                int oldY = state.dragging->y;
+
+                gfxMarkDirty(
+                    &ctx->backbuffer,
+                    oldX,
+                    oldY,
+                    oldX + state.dragging->surface.width,
+                    oldY + state.dragging->surface.height + state.dragging->titleBarHeight
+                );
+
                 state.dragging->x = ev->mouse.x - state.dragOffsetX;
                 state.dragging->y = ev->mouse.y - state.dragOffsetY;
+                
+                gfxMarkDirty(
+                    &ctx->backbuffer,
+                    state.dragging->x,
+                    state.dragging->y,
+                    state.dragging->x + state.dragging->surface.width,
+                    state.dragging->y + state.dragging->surface.height + state.dragging->titleBarHeight
+                );
             }
 
             gfxWindow_t* target = compositorHitTest(windows, ev->mouse.x, ev->mouse.y);
@@ -242,31 +269,26 @@ static void dispatchEvent(gfxWindow_t* windows, event_t* ev) {
 }
 
 static void compositorDrawCursor(gfxSurface_t* surface, int x, int y) {
-    gfxFillRect(
-        surface,
-        x,
-        y,
-        8,
-        8,
-        0xFFFFFF
-    );
+    gfxFillRect(surface, x, y, 8, 8, 0xFFFFFF);
 }
 
-void compositorLoop(gfxContext_t* ctx, desktop_t* desktop) {
+void compositorLoop(gfxContext_t* ctx, desktop_t* desktop, gfxWindow_t* windows) {
     eventPump();
-
+    
     event_t ev;
     while (eventPoll(&ev)) {
-        dispatchEvent(windows, &ev);
+        dispatchEvent(ctx, windows, &ev);
     }
-
+    
     gfxBeginFrame(ctx);
 
-    gfxFillRect(&ctx->backbuffer, 0, 0, ctx->width, ctx->height, 0x000000);
+    gfxFillRect(&ctx->backbuffer, 0, 0, ctx->width, ctx->height, desktop->bg);
 
-    desktopDrawBackground(desktop);
-    compositorDrawWindows(&ctx->backbuffer, windows);
     desktopDrawTaskbar(&desktop->taskbar);
+    gfxBlit(&ctx->backbuffer, &desktop->taskbar.surface, 0, ctx->height - desktop->taskbar.surface.height);
+    
+    compositorDrawWindows(&ctx->backbuffer, windows);
+    
     compositorDrawCursor(&ctx->backbuffer, state.mouseX, state.mouseY);
 
     gfxEndFrame(ctx);
